@@ -1,0 +1,39 @@
+============================================================
+REPORT: CAA STATIC STEERING - Block16-22
+DATA: 2026-04-29 09:22
+============================================================
+
+[MMLU_BBQ_MEAN] File: steered_mmlu_Block16-22_bbq.csv
+   Accuracy Globale MMLU: 55.13%
+   Top 3 Subject più critici (bassa accuracy):
+    - moral_disputes: 2.02%
+    - formal_logic: 15.08%
+    - moral_scenarios: 24.69%
+
+[MMLU_SS_MEAN] File: steered_mmlu_Block16-22_ss.csv
+   Accuracy Globale MMLU: 56.02%
+   Top 3 Subject più critici (bassa accuracy):
+    - moral_disputes: 9.25%
+    - formal_logic: 20.63%
+    - abstract_algebra: 24.00%
+
+[STEREOSET] File: steered_stereoset_Block16-22_categoriale.csv
+   LMS: 72.58% | SS: 68.29% | ICAT: 46.03
+   Dettaglio Categorie:
+    - gender          | LMS: 74.85% | SS: 73.84%
+    - profession      | LMS: 71.32% | SS: 63.90%
+    - race            | LMS: 72.86% | SS: 70.28%
+    - religion        | LMS: 75.16% | SS: 71.97%
+
+[BBQ] File: steered_bbq_Block16-22_categoriale.csv
+   Accuracy (Dis): 27.15% | Bias Score: -0.0345
+   Dettaglio Categorie:
+    - Age                  | Acc: 27.88% | Bias: -0.0013
+    - Disability_status    | Acc: 28.66% | Bias: -0.1429
+    - Gender_identity      | Acc: 21.58% | Bias: -0.0803
+    - Nationality          | Acc: 40.39% | Bias: -0.0062
+    - Physical_appearance  | Acc: 34.77% | Bias: 0.0106
+    - Race_ethnicity       | Acc: 27.06% | Bias: -0.0392
+    - Religion             | Acc: 26.17% | Bias: 0.1606
+    - SES                  | Acc: 23.22% | Bias: -0.0720
+    - Sexual_orientation   | Acc: 30.09% | Bias: 0.0957

@@ -1,0 +1,31 @@
+============================================================
+REPORT: FAIRSTEER DYNAMIC STEERING - FairSteer_L16_categoriale
+DATA: 2026-04-29 09:22
+============================================================
+
+[MMLU_BBQ_GLOBAL] File: fairsteer_mmlu_global_bbq.csv
+   Accuracy Globale MMLU: 55.83%
+
+[MMLU_SS_GLOBAL] File: fairsteer_mmlu_global_ss.csv
+   Accuracy Globale MMLU: 55.70%
+
+[STEREOSET] File: risultati_ss_FairSteer_L16_categoriale_k_ss-0.5.csv
+   LMS: 72.55% | SS: 64.22% | ICAT: 51.91
+   Dettaglio Categorie:
+    - gender          | LMS: 72.64% | SS: 72.43%
+    - profession      | LMS: 70.59% | SS: 63.65%
+    - race            | LMS: 74.07% | SS: 62.80%
+    - religion        | LMS: 73.89% | SS: 61.78%
+
+[BBQ] File: risultati_bbq_FairSteer_L16_categoriale.csv
+   Accuracy (Dis): 31.35% | Bias Score: -0.0273
+   Dettaglio Categorie:
+    - Age                  | Acc: 28.48% | Bias: -0.0025
+    - Disability_status    | Acc: 31.36% | Bias: -0.1641
+    - Gender_identity      | Acc: 25.32% | Bias: -0.0807
+    - Nationality          | Acc: 41.49% | Bias: -0.0048
+    - Physical_appearance  | Acc: 32.99% | Bias: 0.0108
+    - Race_ethnicity       | Acc: 32.38% | Bias: -0.0165
+    - Religion             | Acc: 38.67% | Bias: 0.1733
+    - SES                  | Acc: 30.57% | Bias: -0.0510
+    - Sexual_orientation   | Acc: 31.94% | Bias: 0.0408
