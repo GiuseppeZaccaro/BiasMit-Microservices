@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # 1. Il Microservizio Python (Inference)
+  ai-inference-service:
+    build: ./ai-inference-service
+    container_name: ai-inference-service
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data  # Condivide la cartella locale 'data' con il container
+    networks:
+      - bias-network
+
+  # 2. Il Database PostgreSQL (Per i Bookmark di Spring Boot)
+  db:
+    image: postgres:15
+    container_name: bias-db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: bias_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persistenza dei dati del DB
+    networks:
+      - bias-network
+
+  # 3. Lo Spring Boot Gateway (Lo aggiungiamo come "placeholder")
+  # Nota: per ora lo teniamo commentato finché non hai il Dockerfile in Java
+  # gateway:
+  #   build: ./bias-mit-gateway
+  #   container_name: bias-mit-gateway
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - ai-inference-service
+  #     - db
+  #   networks:
+  #     - bias-network
+
+networks:
+  bias-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
