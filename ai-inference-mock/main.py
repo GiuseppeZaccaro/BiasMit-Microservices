@@ -7,12 +7,14 @@ import os
 import numpy as np
 import traceback
 
+#creo l'istanza dell'applicazione API
 app = FastAPI(title="BiasMit AI Inference Mock Service")
 
 # --- CONFIGURAZIONE PERCORSI ---
 DATA_BASE_PATH = "/app/data/datasets"
 RESULTS_BASE_PATH = "/app/data/results"
 
+#dizionario che mappa i nomi dei metodi ai rispettivi file CSV per BBQ
 BBQ_FILES = {
     "baseline": "baseline_bbq_full.csv",
     "caa_puntuale": "steered_bbq_L16_puntuale_categoriale.csv",
@@ -20,6 +22,7 @@ BBQ_FILES = {
     "fairsteer": "risultati_bbq_FairSteer_L16_categoriale.csv"
 }
 
+#dizionario che mappa i nomi dei metodi ai rispettivi file CSV per StereoSet
 STEREOSET_FILES = {
     "baseline": "baseline_stereoset_full.csv",
     "caa_puntuale": "steered_stereoset_L16_puntuale_categoriale.csv",
@@ -63,24 +66,30 @@ def load_stereoset_df():
         raise HTTPException(status_code=500, detail=f"Impossibile leggere il file binario StereoSet: {str(e)}")
 
 # --- HELPERS BBQ ---
-
+#funzione che pulisce la risposta per capire quale opzione è stata scelta dato che spesso i modelli rispondono con testo libero
 def normalize_bbq_response(raw_val, target_data):
+    """Trasforma testo libero in A, B o C confrontandolo con le risposte corrette."""
     val = str(raw_val).strip().lower()
     if not val or val == "nan": return "N/A"
+    #se la risposta nizia già con a.b o c, la prende direttamente
     if val[0] in ['a', 'b', 'c'] and (len(val) == 1 or not val[1].isalpha()):
         return val[0].upper()
+    
+    # Altrimenti, cerchiamo se il testo della risposta contiene il testo di ans0, ans1 o ans2
     if target_data:
         options = {"A": str(target_data.get('ans0', '')).lower(),
                    "B": str(target_data.get('ans1', '')).lower(),
                    "C": str(target_data.get('ans2', '')).lower()}
         for letter, text in options.items():
             if text and (text in val or val in text): return letter
-    return val[:15]
+    return val[:15]# Ritorna i primi 15 caratteri se non riesce a mappare
 
 def find_bbq_response(file_path, category, example_id, target_data):
+    """Cerca la risposta specifica di un modello in un file CSV di risultati."""
     if not os.path.exists(file_path): return "File missing"
     try:
         df = pd.read_csv(file_path, engine='python')
+        # Filtra per categoria e prendi l'esempio all'indice indicato
         res = df[df['Category'].str.lower() == category.lower()]
         if example_id < len(res):
             raw_val = res.iloc[example_id]['Model_Response']
@@ -91,6 +100,7 @@ def find_bbq_response(file_path, category, example_id, target_data):
 # --- HELPER STEREOSET (RICERCA MULTI-STRUTTURA) ---
 
 def find_ss_response(file_path, bias_type, target_word):
+    """Cerca i punteggi Stereo/Anti/Unrelated per una specifica parola target."""
     if not os.path.exists(file_path): 
         return "File missing"
     try:
@@ -98,7 +108,7 @@ def find_ss_response(file_path, bias_type, target_word):
         
         # Normalizzazione colonne (gestisce FairSteer target_group e case-sensitivity)
         df.columns = [c.lower().strip() for c in df.columns]
-        if 'target_group' in df.columns:
+        if 'target_group' in df.columns:#gestione specifica per FairSteer
             df = df.rename(columns={'target_group': 'target'})
 
         # Pulizia dati per il match
@@ -147,6 +157,10 @@ def get_bbq_questions(category: str, limit: int = 100):
 
 @app.get("/bbq/comparison/{model}/{category}/{example_id}")
 def get_bbq_comparison(model: str, category: str, example_id: int):
+    """
+    Punto centrale: per un dato esempio di BBQ, recupera i dati originali
+    e confronta come hanno risposto i 4 diversi metodi (baseline, caa, etc.)
+    """
     questions = get_bbq_questions(category, limit=example_id + 100)
     target = next((q for q in questions if q.get('example_id') == example_id), None)
     if not target: raise HTTPException(404, "ID not found")
@@ -173,6 +187,7 @@ def get_ss_questions(category: str, limit: int = 100):
 
 @app.get("/stereoset/comparison/{model}/{category}/{example_id}")
 def get_ss_comparison(model: str, category: str, example_id: int):
+    """Simile a BBQ, ma per StereoSet: estrae i punteggi numerici di probabilità."""
     try:
         df_all = load_stereoset_df()
         df_cat = df_all[df_all['bias_type'].str.lower() == category.lower()]
@@ -183,7 +198,7 @@ def get_ss_comparison(model: str, category: str, example_id: int):
 
         target_word = target_row['target']
         model_dir = os.path.join(RESULTS_BASE_PATH, model.lower())
-        
+        # Estrae i punteggi da tutti i CSV di StereoSet per il confronto
         comparison = {key: find_ss_response(os.path.join(model_dir, fname), category, target_word)
                       for key, fname in STEREOSET_FILES.items()}
 
