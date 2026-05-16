@@ -1,0 +1,849 @@
+.method-wrapper {
+    min-height: 100vh;
+    background: #001f3f;
+    color: #e2e8f0;
+    font-family: 'Inter', sans-serif;
+    padding-top: 64px; /* navbar */
+}
+
+/* ── Page header ── */
+.method-page-header {
+    padding: 40px 48px 28px;
+    border-bottom: 1px solid #1e3a5f;
+    background: rgba(0, 0, 0, 0.20);
+}
+
+.method-page-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: #e2e8f0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0 0 8px;
+}
+
+.method-page-title .accent { color: #7fdbff; }
+
+.method-page-sub {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 0;
+    max-width: 680px;
+}
+
+/* ── Content container ── */
+.method-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 48px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ── Card ── */
+.method-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #1e3a5f;
+    border-left: 4px solid var(--card-color, #7fdbff);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.method-card:hover {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+}
+
+/* ── Card header (accordion trigger) ── */
+.method-card-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 28px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    gap: 16px;
+    transition: background 0.15s ease;
+}
+.method-card-header:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.method-card-header-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.card-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+    line-height: 1;
+}
+
+.card-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #e2e8f0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 4px;
+}
+
+.card-subtitle {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.card-chevron {
+    font-size: 1.2rem;
+    color: #64748b;
+    flex-shrink: 0;
+    transition: transform 0.25s ease;
+}
+.card-chevron.open {
+    transform: rotate(180deg);
+}
+
+/* ── Card body ── */
+.method-card-body {
+    padding: 0 28px 24px 28px;
+    border-top: 1px solid #1e3a5f;
+    animation: fadeIn 0.2s ease;
+}
+
+.method-card-body p {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    line-height: 1.8;
+    margin: 16px 0 0;
+}
+.method-card-body strong { color: #e2e8f0; }
+.method-card-body em    { color: #cbd5e1; }
+.method-card-body code  { font-family: 'Courier New', monospace; font-size: 0.88em; color: #7fdbff; background: rgba(127,219,255,0.08); padding: 2px 6px; border-radius: 4px; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Info box ── */
+.info-box {
+    margin-top: 16px;
+    background: rgba(127, 219, 255, 0.06);
+    border-left: 3px solid #7fdbff;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 0.86rem;
+    color: #94a3b8;
+    line-height: 1.6;
+}
+.info-box-label {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #7fdbff;
+    margin-bottom: 4px;
+}
+
+/* ── Theory boxes (light-on-dark, high-contrast academic containers) ── */
+.theory-box {
+    margin-top: 18px;
+    background: #f1f5f9;          /* slate-100 — genuine light bg */
+    border: 1px solid #cbd5e1;    /* slate-300 */
+    border-left: 4px solid #64748b;
+    border-radius: 10px;
+    padding: 18px 22px;
+    color: #1e293b;               /* slate-800 */
+}
+
+.theory-box-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #0f172a;               /* slate-900 */
+    margin: 0 0 10px;
+}
+
+.theory-box-body {
+    font-size: 0.88rem;
+    color: #374151;               /* gray-700 */
+    line-height: 1.75;
+    margin: 0 0 10px;
+}
+
+.theory-box-note {
+    font-size: 0.82rem;
+    color: #4b5563;               /* gray-600 */
+    line-height: 1.65;
+    margin: 8px 0 0;
+    font-style: italic;
+}
+
+.theory-box strong { color: #0f172a; }
+.theory-box em     { color: #334155; font-style: italic; }
+.theory-box code   {
+    font-family: 'Courier New', monospace;
+    font-size: 0.88em;
+    background: #e2e8f0;         /* slate-200 */
+    color: #1e293b;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* ── Math formula inside theory-box ── */
+.theory-formula {
+    margin: 10px 0;
+    background: #e8edf5;
+    border: 1px solid #94a3b8;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-family: 'Courier New', 'Georgia', serif;
+    font-size: 1rem;
+    color: #0f172a;
+    line-height: 1.6;
+    text-align: center;
+    letter-spacing: 0.02em;
+}
+
+/* ── Concept row (Spazio Latente — due card affiancate) ── */
+.concept-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.concept-card {
+    border-radius: 12px;
+    padding: 22px 20px;
+    border: 1px solid;
+}
+
+.concept-card-blue {
+    background: rgba(30, 58, 138, 0.12);
+    border-color: rgba(59, 130, 246, 0.35);
+}
+
+.concept-card-cyan {
+    background: rgba(6, 182, 212, 0.08);
+    border-color: rgba(6, 182, 212, 0.35);
+}
+
+.concept-card-icon {
+    font-size: 1.6rem;
+    margin-bottom: 10px;
+    line-height: 1;
+}
+
+.concept-card-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #e2e8f0;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin: 0 0 10px;
+}
+
+.concept-card-body {
+    font-size: 0.86rem;
+    color: #94a3b8;
+    line-height: 1.75;
+    margin: 0;
+}
+
+.concept-card-body strong { color: #e2e8f0; }
+.concept-card-body em    { color: #cbd5e1; font-style: italic; }
+
+/* ── Compare grid (CAA vs FairSteer) ── */
+.compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 20px;
+}
+
+.compare-card {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-top: 4px solid;
+    border-radius: 12px;
+    padding: 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: #1e293b;
+}
+
+.compare-card-green { border-top-color: #4ade80; background: #f0fdf4; border-color: #bbf7d0; }
+.compare-card-purple { border-top-color: #a78bfa; background: #f5f3ff; border-color: #ddd6fe; }
+
+.compare-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    width: fit-content;
+    border: 1.5px solid;
+}
+
+.compare-tag-green  { background: rgba(74,222,128,0.15); border-color: #4ade80; color: #15803d; }
+.compare-tag-purple { background: rgba(167,139,250,0.15); border-color: #a78bfa; color: #6d28d9; }
+
+.compare-headline {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: #0f172a;
+    margin: 0;
+    letter-spacing: 0.3px;
+}
+
+.compare-subline {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: -6px 0 0;
+    font-style: italic;
+}
+
+.compare-body {
+    font-size: 0.88rem;
+    color: #374151;
+    line-height: 1.75;
+    margin: 0;
+}
+
+.compare-body strong { color: #0f172a; }
+.compare-body em    { color: #4b5563; font-style: italic; }
+
+.compare-insight {
+    background: rgba(255,255,255,0.70);
+    border-left: 3px solid #94a3b8;
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    color: #374151;
+    line-height: 1.6;
+}
+
+.compare-insight-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.compare-pros-cons {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.compare-pro,
+.compare-con {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: #374151;
+}
+
+.compare-pro-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #22c55e; flex-shrink: 0;
+}
+
+.compare-con-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #f59e0b; flex-shrink: 0;
+}
+
+/* ── Dataset grid ── */
+.dataset-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 20px;
+}
+
+.dataset-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-top: 4px solid;
+    border-radius: 12px;
+    padding: 20px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    color: #1e293b;
+}
+
+.dataset-card-orange { border-top-color: #FF8C00; background: #fff7ed; border-color: #fed7aa; }
+.dataset-card-red    { border-top-color: #f87171; background: #fff5f5; border-color: #fecaca; }
+.dataset-card-blue   { border-top-color: #60a5fa; background: #eff6ff; border-color: #bfdbfe; }
+
+.dataset-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dataset-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.dataset-name {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 900;
+    color: #0f172a;
+    letter-spacing: 0.5px;
+}
+
+.dataset-full {
+    font-size: 0.7rem;
+    color: #64748b;
+    margin-top: 1px;
+}
+
+.dataset-question {
+    font-size: 0.82rem;
+    color: #374151;
+    line-height: 1.6;
+    margin: 0;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.65);
+    border-radius: 6px;
+    border-left: 3px solid #94a3b8;
+}
+
+.dataset-question strong { color: #0f172a; }
+
+.dataset-body {
+    font-size: 0.85rem;
+    color: #374151;
+    line-height: 1.75;
+    margin: 0;
+}
+
+.dataset-body em { color: #475569; font-style: italic; }
+
+.dataset-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dataset-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.75);
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.dataset-metric-name {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dataset-metric-desc {
+    font-size: 0.80rem;
+    color: #4b5563;
+    line-height: 1.55;
+}
+
+.dataset-metric-desc strong { color: #0f172a; }
+
+.dataset-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.cat-chip {
+    padding: 3px 9px;
+    border: 1px solid;
+    border-radius: 14px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    background: rgba(255,255,255,0.5);
+}
+
+/* ── CAA variants ── */
+.variants-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.variant-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.variant-header {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #e2e8f0;
+    margin-bottom: 8px;
+}
+
+.variant-card p {
+    margin: 0 !important;
+    font-size: 0.84rem !important;
+    color: #94a3b8 !important;
+}
+
+/* ── Formula ── */
+.formula-box {
+    margin-top: 16px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid #1e3a5f;
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-size: 0.9rem;
+}
+.formula-box code { background: none; padding: 0; font-size: 1rem; color: #4ade80; }
+.formula-desc { color: #64748b; font-size: 0.82rem; margin-left: 8px; }
+
+/* ── BBQ categories grid ── */
+.categories-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.category-tag {
+    padding: 4px 12px;
+    border: 1px solid;
+    border-radius: 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.category-tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+/* ── Metrics list ── */
+.metrics-list {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.metric-def {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid #1e3a5f;
+    border-radius: 8px;
+}
+
+.metric-name {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    min-width: 60px;
+    padding-top: 1px;
+}
+
+.metric-desc {
+    font-size: 0.84rem;
+    color: #94a3b8;
+    line-height: 1.6;
+}
+.metric-desc strong { color: #e2e8f0; }
+
+/* ── StereoSet examples ── */
+.ss-examples {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.ss-example {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    border-left: 3px solid transparent;
+    font-size: 0.88rem;
+}
+.ss-example em { color: #cbd5e1; font-style: italic; }
+
+.ss-stereo    { background: rgba(248, 113, 113, 0.06); border-left-color: #f87171; }
+.ss-anti      { background: rgba(74, 222, 128, 0.06);  border-left-color: #4ade80; }
+.ss-unrelated { background: rgba(148, 163, 184, 0.06); border-left-color: #94a3b8; }
+
+.ss-badge {
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    white-space: nowrap;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.10);
+    color: #e2e8f0;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* ── LLM-as-a-Judge section ── */
+.llm-badges-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+    margin-bottom: 4px;
+}
+
+.llm-badge {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    border: 1.5px solid;
+}
+.llm-badge-amber  { background: rgba(245,158,11,0.12);  border-color: #f59e0b; color: #f59e0b; }
+.llm-badge-cyan   { background: rgba(6,182,212,0.12);   border-color: #06b6d4; color: #06b6d4; }
+.llm-badge-orange { background: rgba(249,115,22,0.12);  border-color: #f97316; color: #f97316; }
+.llm-badge-purple { background: rgba(167,139,250,0.12); border-color: #a78bfa; color: #a78bfa; }
+
+.llm-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 20px;
+}
+
+.llm-detail-card {
+    background: rgba(245,158,11,0.04);
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius: 10px;
+    padding: 16px 18px;
+}
+
+.llm-detail-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #f59e0b;
+    margin-bottom: 8px;
+}
+
+.llm-detail-card p {
+    margin: 0 !important;
+    font-size: 0.84rem !important;
+    color: #94a3b8 !important;
+    line-height: 1.65 !important;
+}
+
+/* ── Architecture diagram ── */
+.arch-diagram {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+}
+
+.arch-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+}
+
+.arch-row-split {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+}
+
+.arch-node {
+    border: 1px solid;
+    border-radius: 10px;
+    padding: 14px 24px;
+    text-align: center;
+    min-width: 220px;
+}
+
+.arch-node-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 4px;
+}
+
+.arch-node-sub {
+    font-size: 0.72rem;
+    color: #64748b;
+}
+
+.arch-frontend  { border-color: #7fdbff; background: rgba(127,219,255,0.06); }
+.arch-frontend .arch-node-title { color: #7fdbff; }
+
+.arch-gateway   { border-color: #4ade80; background: rgba(74,222,128,0.06); }
+.arch-gateway .arch-node-title { color: #4ade80; }
+
+.arch-python    { border-color: #FF8C00; background: rgba(255,140,0,0.06); }
+.arch-python .arch-node-title { color: #FF8C00; }
+
+.arch-analytics { border-color: #a78bfa; background: rgba(167,139,250,0.06); }
+.arch-analytics .arch-node-title { color: #a78bfa; }
+
+.arch-data      { border-color: #94a3b8; background: rgba(148,163,184,0.06); min-width: 340px; }
+.arch-data .arch-node-title { color: #94a3b8; }
+
+.arch-arrow {
+    font-size: 0.78rem;
+    color: #64748b;
+    padding: 6px 0;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+.arch-arrows-split {
+    display: flex;
+    justify-content: space-around;
+    width: 60%;
+    padding: 4px 0;
+}
+.arch-arrow-left, .arch-arrow-right {
+    font-size: 0.72rem;
+    color: #64748b;
+    letter-spacing: 0.5px;
+}
+
+.arch-arrows-three {
+    display: flex;
+    justify-content: space-around;
+    width: 85%;
+    padding: 4px 0;
+}
+.arch-arrow-label {
+    font-size: 0.72rem;
+    color: #64748b;
+    letter-spacing: 0.5px;
+}
+
+.arch-row-three {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+.arch-row-three .arch-node {
+    min-width: 180px;
+    flex: 1;
+    max-width: 240px;
+}
+
+.arch-interp { border-color: #f59e0b; background: rgba(245,158,11,0.06); }
+.arch-interp .arch-node-title { color: #f59e0b; }
+
+.arch-legend {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.legend-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.83rem;
+    color: #94a3b8;
+}
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ── Overrides for metric-def and category-tag inside light theory-boxes ── */
+.theory-box .metric-def {
+    background: rgba(255, 255, 255, 0.65);
+    border-color: #cbd5e1;
+}
+
+.theory-box .metric-desc {
+    color: #374151;
+}
+
+.theory-box .metric-desc strong {
+    color: #0f172a;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .dataset-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 700px) {
+    .method-page-header { padding: 28px 20px 20px; }
+    .method-content { padding: 24px 16px 60px; }
+    .method-card-header { padding: 18px 16px; }
+    .method-card-body { padding: 0 16px 20px; }
+    .variants-grid { grid-template-columns: 1fr; }
+    .concept-row { grid-template-columns: 1fr; }
+    .compare-grid { grid-template-columns: 1fr; }
+    .dataset-grid { grid-template-columns: 1fr; }
+    .llm-detail-grid { grid-template-columns: 1fr; }
+    .arch-row-three { flex-direction: column; align-items: center; }
+    .arch-row-three .arch-node { max-width: 100%; }
+    .arch-arrows-three { width: 100%; }
+}

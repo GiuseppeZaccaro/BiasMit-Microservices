@@ -1,0 +1,105 @@
+/* Layout Principale */
+.home-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background-color: #001f3f; /* Blu Scuro di base */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Layer delle Particelle */
+.particles-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Wrapper del contenuto per stare sopra le particelle */
+.content-wrapper {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 1000px;
+    padding: 20px;
+}
+
+/* Titolo 3D Bianco con Estrusione Arancione Profonda */
+.title-3d {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: #ffffff; /* Titolo Bianco */
+    letter-spacing: 12px;
+    margin-bottom: 40px;
+    
+    /* Estrusione 3D profonda giallo-arancio */
+    text-shadow: 
+        0 1px 0 #FF8C00,
+        0 2px 0 #FF8C00,
+        0 3px 0 #FF8C00,
+        0 4px 0 #FF8C00,
+        0 5px 0 #FF8C00,
+        0 6px 0 #FF8C00,
+        0 7px 0 #e67e00,
+        0 8px 0 #cc7000,
+        0 9px 0 #b36200,
+        0 12px 25px rgba(0,0,0,0.6);
+    
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.title-3d:hover {
+    transform: translateY(-8px) scale(1.02);
+}
+
+/* Descrizione Bianca Professionale */
+.description {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.25rem;
+    line-height: 1.9;
+    color: #ffffff; /* Testo Bianco */
+    max-width: 850px;
+    margin: 0 auto 50px auto;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Bottone con Bordo Celeste */
+.btn-analysis {
+    font-family: 'Inter', sans-serif;
+    display: inline-block;
+    padding: 18px 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-decoration: none;
+    background-color: transparent;
+    border: 3px solid #7fdbff; /* Bordo Celeste */
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-analysis:hover {
+    background-color: #7fdbff;
+    color: #001f3f;
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(127, 219, 255, 0.5);
+}
+
+/* Responsive per schermi piccoli */
+@media (max-width: 768px) {
+    .title-3d { font-size: 4rem; letter-spacing: 6px; }
+    .description { font-size: 1.1rem; }
+}

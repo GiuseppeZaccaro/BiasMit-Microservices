@@ -1,45 +1,108 @@
 version: '3.8'
 
 services:
-  # 1. Il Microservizio Python (Inference)
+
+  # 1. Microservizio Python — Inference
   ai-inference-service:
-    build: ./ai-inference-service
+    build: ./ai-inference-mock
     container_name: ai-inference-service
     ports:
       - "8000:8000"
+    environment:
+      - DATA_BASE_PATH=/app/data/datasets
+      - RESULTS_BASE_PATH=/app/data/results
+      - STATS_BASE_PATH=/app/data/stats
+      - MODELS_CONFIG_PATH=/app/models.yaml
     volumes:
-      - ./data:/app/data  # Condivide la cartella locale 'data' con il container
+      - ./shared/config_manager.py:/app/config_manager.py:ro
+      - ./shared/models.yaml:/app/models.yaml:ro
+      - ./data:/app/data
     networks:
       - bias-network
 
-  # 2. Il Database PostgreSQL (Per i Bookmark di Spring Boot)
+  # 2. Microservizio Python — Analytics
+  ai-analytics-service:
+    build: ./analytics-service
+    container_name: ai-analytics-service
+    ports:
+      - "8001:8001"
+    environment:
+      - STATS_BASE_PATH=/app/data/stats
+      - DATA_BASE_PATH=/app/data/datasets
+      - MODELS_CONFIG_PATH=/app/models.yaml
+    volumes:
+      - ./shared/config_manager.py:/app/config_manager.py:ro
+      - ./shared/models.yaml:/app/models.yaml:ro
+      - ./data:/app/data
+    networks:
+      - bias-network
+
+  # 3. Database PostgreSQL
   db:
     image: postgres:15
     container_name: bias-db
     restart: always
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: bias_db
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-bias_db}
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data # Persistenza dei dati del DB
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - bias-network
 
-  # 3. Lo Spring Boot Gateway (Lo aggiungiamo come "placeholder")
-  # Nota: per ora lo teniamo commentato finché non hai il Dockerfile in Java
-  # gateway:
-  #   build: ./bias-mit-gateway
-  #   container_name: bias-mit-gateway
-  #   ports:
-  #     - "8080:8080"
-  #   depends_on:
-  #     - ai-inference-service
-  #     - db
-  #   networks:
-  #     - bias-network
+  # 4. Microservizio Python — Interpretation (LLM)
+  ai-interpretation-service:
+    build: ./ai-interpretation-service
+    container_name: ai-interpretation-service
+    ports:
+      - "8002:8002"
+    environment:
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - LLM_MODEL=${LLM_MODEL:-llama-3.1-8b-instant}
+      - MODELS_CONFIG_PATH=/app/models.yaml
+    volumes:
+      - ./shared/config_manager.py:/app/config_manager.py:ro
+      - ./shared/models.yaml:/app/models.yaml:ro
+    networks:
+      - bias-network
+
+  # 5. Spring Boot Gateway
+  gateway:
+    build: ./bias-mit-gateway
+    container_name: bias-mit-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - ai-inference-service
+      - ai-analytics-service
+      - ai-interpretation-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${POSTGRES_DB:-bias_db}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-user}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - PYTHON_INFERENCE_URL=http://ai-inference-service:8000
+      - PYTHON_ANALYTICS_URL=http://ai-analytics-service:8001
+      - PYTHON_INTERPRETATION_URL=http://ai-interpretation-service:8002
+    networks:
+      - bias-network
+
+  # 6. Frontend React (Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8080/api/gateway
+    container_name: bias-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - gateway
+    networks:
+      - bias-network
 
 networks:
   bias-network:

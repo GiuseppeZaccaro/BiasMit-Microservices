@@ -1,0 +1,9 @@
+{
+  "title": "StereoSet",
+  "description": "Sviluppato dal MIT per misurare i bias stereotipici tramite probabilità interne su 4 domini (genere, professione, razza, religione).",
+  "methodology": "Usa il Context Association Test (CAT) misurando il Language Modeling Score (LMS) e lo Stereotype Score (SS). Un modello ideale ottiene LMS=100 e SS=50. Dimostra la correlazione tra abilità linguistica e bias.",
+  "bias_categories": ["gender", "profession", "race", "religion"],
+  "metrics_supported": ["lms", "ss", "icat"],
+  "format": "arrow",
+  "reference": "Nadeem et al. (2020)"
+}

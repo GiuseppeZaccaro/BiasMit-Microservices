@@ -1,0 +1,104 @@
+/* =========================================
+   NAVBAR — glassmorphism persistente
+   ========================================= */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    background: rgba(0, 20, 45, 0.80);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(127, 219, 255, 0.12);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Brand ── */
+.navbar-brand {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #e2e8f0;
+    text-decoration: none;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: color 0.2s ease;
+    flex-shrink: 0;
+}
+.navbar-brand:hover { color: #7fdbff; }
+
+.navbar-brand-accent {
+    color: #FF8C00;
+}
+
+/* ── Links list ── */
+.navbar-links {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Single link ── */
+.navbar-link {
+    display: block;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-decoration: none;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+    transition:
+        color       0.20s ease,
+        background  0.20s ease,
+        border-color 0.20s ease,
+        box-shadow  0.20s ease,
+        transform   0.15s ease;
+}
+
+.navbar-link:hover {
+    color: #e2e8f0;
+    background: rgba(127, 219, 255, 0.08);
+    border-color: rgba(127, 219, 255, 0.20);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(127, 219, 255, 0.10);
+}
+
+/* ── Active state ── */
+.navbar-link-active {
+    color: #7fdbff !important;
+    background: rgba(127, 219, 255, 0.12) !important;
+    border-color: rgba(127, 219, 255, 0.30) !important;
+    box-shadow: 0 0 0 1px rgba(127, 219, 255, 0.15) inset !important;
+}
+.navbar-link-active:hover {
+    transform: none;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0 20px;
+    }
+    .navbar-link {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 560px) {
+    .navbar-brand { font-size: 1rem; }
+    .navbar-links { gap: 2px; }
+    .navbar-link  { padding: 6px 8px; font-size: 0.7rem; letter-spacing: 0; }
+}

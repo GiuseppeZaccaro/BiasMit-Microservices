@@ -13,7 +13,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia il tuo script main.py dentro il container
+# config_manager.py and models.yaml are injected at runtime via docker-compose volume mounts
+# from ./shared/ — do not bake them into the image.
 COPY main.py .
 
 # Esponi la porta 8000 (quella usata da FastAPI)

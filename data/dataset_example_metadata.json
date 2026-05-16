@@ -1,0 +1,24 @@
+{
+  "_comment": "Template per aggiungere un nuovo dataset al sistema BiasMit.",
+  "_usage": [
+    "1. Crea la cartella:  data/datasets/<dataset_id>/",
+    "2. Copia questo file come metadata.json nella nuova cartella.",
+    "3. Inserisci almeno un file .arrow o .jsonl nella stessa cartella.",
+    "4. Il sistema rileverà automaticamente il dataset al prossimo avvio.",
+    "5. Per i risultati: aggiungi le voci sotto 'results.<dataset_id>' in models.yaml."
+  ],
+  "title": "Nome Completo del Dataset",
+  "description": "Breve descrizione del dataset e del suo scopo nella valutazione del bias.",
+  "methodology": "Descrizione della metodologia di valutazione (es. come viene calcolato il bias score).",
+  "bias_categories": [
+    "categoria_1",
+    "categoria_2",
+    "categoria_3"
+  ],
+  "metrics_supported": [
+    "metrica_1",
+    "metrica_2"
+  ],
+  "format": "jsonl",
+  "reference": "Autore et al. (Anno)"
+}

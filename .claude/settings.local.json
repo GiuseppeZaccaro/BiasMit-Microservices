@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker-compose up *)",
+      "Bash(curl -s http://localhost:8000/)",
+      "Bash(curl -s http://localhost:8000/bbq/categories)",
+      "Bash(curl -s \"http://localhost:8080/api/gateway/reports/mistral/baseline\")",
+      "Bash(curl -s \"http://localhost:8080/api/gateway/categories/bbq\")",
+      "Bash(mvn package *)",
+      "Bash(ping -n 8 127.0.0.1)",
+      "Bash(curl -s \"http://localhost:8080/api/gateway/reports/mistral/caa_puntuale\")",
+      "Bash(curl -s \"http://localhost:8080/api/gateway/reports/mistral/caa_block\")",
+      "Bash(curl -s \"http://localhost:8080/api/gateway/reports/mistral/fairsteer\")",
+      "Bash(curl -s \"http://localhost:8080/api/gateway/categories/stereoset\")",
+      "Bash(curl -s \"http://localhost:8080/api/gateway/explore/bbq/Age?limit=2\")",
+      "Bash(ping -n 10 127.0.0.1)",
+      "Bash(python -m json.tool)",
+      "Bash(npm run *)",
+      "Bash(ping -n 4 127.0.0.1)",
+      "Bash(start *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\giuse\\\\Desktop\\\\Evoluzione_Del_Software\\\\BiasMit-Microservices-1\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Skill(update-config)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\giuse\\\\Desktop\\\\Evoluzione_Del_Software\\\\BiasMit-Microservices-1\\\\frontend\\\\src\" -Recurse -Filter \"*.jsx\" -o -Filter \"*.js\")",
+      "Bash(Select-Object FullName)",
+      "Bash(curl -s http://localhost:8000/stereoset/categories)",
+      "Bash(curl -s \"http://localhost:8000/stereoset/category/gender/questions?limit=3\")",
+      "Bash(python -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(r.get\\('target'\\), '|', r.get\\('display_sentence','MISSING'\\)\\) for r in data]\")",
+      "Bash(python -c ' *)",
+      "Bash(curl -s \"http://localhost:8000/stereoset/comparison/mistral/gender/0\")",
+      "Bash(curl -s http://localhost:8001/analytics/comparison)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('methods:', d['methods']\\); print\\('radar metrics:', [r['metric'] for r in d['radar_data']]\\); print\\('bar sample:', d['metrics_bar'][0]\\)\")",
+      "Bash(curl -s http://localhost:8001/analytics/model/mistral)",
+      "Bash(curl -s http://localhost:8080/api/gateway/analytics/comparison)",
+      "Bash(curl -s http://localhost:8080/api/gateway/analytics/model/mistral)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/methodology)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('OK — model:', d['model'], '| sections:', list\\(d.keys\\(\\)\\)\\)\")",
+      "Bash(Select-Object -First 20 FullName)"
+    ]
+  }
+}

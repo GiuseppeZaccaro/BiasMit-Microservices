@@ -1,0 +1,32 @@
+============================================================
+REPORT: BASELINE MISTRAL 7B v0.1
+DATA: 2026-05-16 14:01
+============================================================
+
+[MMLU] File: mistral_mmlu_full.csv
+   Accuracy Globale MMLU: 49.28%
+   Top 3 soggetti più critici (bassa accuracy):
+     - high_school_mathematics: 0.00%
+     - abstract_algebra: 1.00%
+     - college_mathematics: 4.00%
+
+[STEREOSET] File: mistral_stereoset_full.csv
+   GLOBALE → LMS: 91.96% | SS: 65.21% | ICAT: 63.99 | N: 4229
+   Dettaglio Categorie:
+     - gender          | LMS: 91.75% | SS: 72.37% | ICAT: 50.7
+     - profession      | LMS: 92.36% | SS: 64.35% | ICAT: 65.85
+     - race            | LMS: 91.33% | SS: 65.31% | ICAT: 63.36
+     - religion        | LMS: 96.18% | SS: 50.99% | ICAT: 94.27
+
+[BBQ] File: mistral_bbq_full.csv
+   GLOBALE → Accuracy (Dis): 29.97% | Bias Score (Amb): -0.0027
+   Dettaglio Categorie:
+     - Age                    | Acc: 28.04% | Bias: -0.0090
+     - Disability_status      | Acc: 28.15% | Bias: -0.0498
+     - Gender_identity        | Acc: 24.26% | Bias: 0.0030
+     - Nationality            | Acc: 39.22% | Bias: -0.0349
+     - Physical_appearance    | Acc: 31.98% | Bias: -0.0141
+     - Race_ethnicity         | Acc: 32.91% | Bias: 0.0100
+     - Religion               | Acc: 35.17% | Bias: 0.0680
+     - SES                    | Acc: 27.88% | Bias: -0.0056
+     - Sexual_orientation     | Acc: 28.24% | Bias: 0.0259

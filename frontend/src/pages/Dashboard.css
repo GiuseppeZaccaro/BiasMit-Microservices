@@ -1,0 +1,455 @@
+/* =========================================
+   LAYOUT GENERALE
+   ========================================= */
+.dashboard-wrapper {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    background-color: #001f3f;
+    overflow: hidden;
+    padding-top: 64px; /* navbar height */
+    box-sizing: border-box;
+}
+
+/* =========================================
+   SIDEBAR BIANCA SOLIDA (OTTIMIZZATA)
+   ========================================= */
+.control-sidebar {
+    width: 25%;
+    min-width: 320px;
+    background: #ffffff;
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
+    border-right: 1px solid #e2e8f0;
+    justify-content: flex-start; 
+}
+
+.sidebar-logo {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 1px 1px 0 #FF8C00, 2px 2px 0 #FF8C00, 3px 3px 0 #FF8C00;
+    -webkit-text-stroke: 1px #FF8C00;
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.control-group {
+    margin-bottom: 35px;
+    position: relative;
+}
+
+.control-group label {
+    display: block;
+    font-weight: 700;
+    color: #001f3f;
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* MENU A TENDINA (Select) */
+.control-group select {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid #001f3f;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #001f3f;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none; 
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23001f3f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px;
+}
+
+.control-group select:hover {
+    border-color: #FF8C00;
+}
+
+/* Margine extra per forzare l'apertura delle categorie verso il basso */
+.category-select-wrapper {
+    margin-bottom: 40px;
+}
+
+/* Base condivisa per tutti i bottoni nav */
+.nav-btn {
+    margin-top: auto;
+    width: 100%;
+    padding: 14px;
+    background: #001f3f;
+    border: 2px solid;
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease;
+}
+
+.nav-btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Stats Modello — verde */
+.nav-btn-stats {
+    color: #4ade80;
+    border-color: #4ade80;
+}
+.nav-btn-stats:hover {
+    background: #4ade80;
+    color: #001f3f;
+    box-shadow: 0 4px 16px rgba(74, 222, 128, 0.30);
+}
+
+/* Confronto Globale — arancione */
+.nav-btn-comparison {
+    color: #FF8C00;
+    border-color: #FF8C00;
+}
+.nav-btn-comparison:hover {
+    background: #FF8C00;
+    color: #001f3f;
+    box-shadow: 0 4px 16px rgba(255, 140, 0, 0.30);
+}
+
+/* Preferiti — ciano (eredita .bookmarks-nav-btn) */
+.bookmarks-nav-btn {
+    width: 100%;
+    padding: 14px;
+    background: #001f3f;
+    color: #7fdbff;
+    border: 2px solid #7fdbff;
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease;
+}
+
+.bookmarks-nav-btn:hover {
+    background: #7fdbff;
+    color: #001f3f;
+    box-shadow: 0 4px 16px rgba(127, 219, 255, 0.35);
+    transform: translateY(-1px);
+}
+
+/* =========================================
+   AREA DI LAVORO BLU
+   ========================================= */
+.work-area {
+    flex: 1;
+    background-color: #001f3f;
+    overflow-y: auto;
+    position: relative;
+}
+
+.work-content {
+    padding: 60px;
+    position: relative;
+    z-index: 2;
+}
+
+.model-title-main {
+    font-family: 'Montserrat', sans-serif;
+    color: #7fdbff;
+    text-align: center;
+    font-size: 3rem;
+    margin-bottom: 50px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+/* RIQUADRI FISSI (ARCHITETTURA E DATASET) */
+.info-grid-top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 50px;
+}
+
+.info-panel {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(5px);
+    border-radius: 12px;
+    padding: 25px;
+    border-left: 5px solid #FF8C00;
+    color: white;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.info-panel:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(127, 219, 255, 0.15);
+}
+
+.info-panel h4 {
+    color: #7fdbff;
+    margin-bottom: 12px;
+    font-family: 'Montserrat', sans-serif;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+}
+
+.dot {
+    height: 8px;
+    width: 8px;
+    background: #FF8C00;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 12px;
+}
+
+.meth-tag {
+    display: block;
+    margin-top: 15px;
+    color: #a2d2ff;
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+/* =========================================
+   FOGLIO BIANCO RISULTATI (PAPER)
+   ========================================= */
+.results-paper {
+    background: #ffffff;
+    border-radius: 4px;
+    padding: 60px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    color: #001f3f;
+}
+
+.paper-section {
+    margin-bottom: 60px;
+}
+
+.paper-title-orange {
+    font-family: 'Montserrat', sans-serif;
+    color: #FF8C00;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 12px;
+    margin-bottom: 40px;
+    font-size: 1.3rem;
+    text-transform: uppercase;
+}
+
+/* STATISTICHE: 4 TABELLE DINAMICHE */
+.multi-stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 60px;
+    align-items: start;
+}
+
+.stat-column {
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-column:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 31, 63, 0.10);
+}
+
+.method-label {
+    background: #001f3f;
+    color: #7fdbff;
+    padding: 12px 5px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    border-bottom: 2px solid #FF8C00;
+}
+
+.stat-table-wrapper {
+    padding: 10px;
+    max-height: 400px; /* Scroll se ci sono troppe metriche */
+    overflow-y: auto;
+}
+
+.dynamic-stat-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+
+.dynamic-stat-table th {
+    text-align: left;
+    color: #94a3b8;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    padding: 8px 5px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.dynamic-stat-table td {
+    padding: 10px 5px;
+    border-bottom: 1px solid #f8fafc;
+}
+
+.stat-key {
+    color: #475569;
+    text-transform: capitalize;
+    font-weight: 500;
+}
+
+.stat-val {
+    text-align: right;
+    font-family: 'Courier New', Courier, monospace; /* Font tecnico */
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.orange-bold {
+    color: #FF8C00 !important;
+}
+
+/* =========================================
+   ESPLORA PROMPT — SCROLLABLE CONTAINER
+   ========================================= */
+.prompts-scroll-container {
+    max-height: 400px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: #001f3f #f1f5f9;
+}
+
+.prompts-scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+.prompts-scroll-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+.prompts-scroll-container::-webkit-scrollbar-thumb {
+    background: #001f3f;
+    border-radius: 3px;
+}
+
+.prompts-empty {
+    color: #94a3b8;
+    font-style: italic;
+    font-size: 0.9rem;
+    padding: 20px 0;
+    text-align: center;
+}
+
+.prompt-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #001f3f;
+    border-radius: 8px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-left-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.prompt-card:hover {
+    border-left-color: #FF8C00;
+    box-shadow: 0 2px 8px rgba(0, 31, 63, 0.08);
+}
+
+.prompt-card-id {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding-top: 2px;
+    min-width: 28px;
+}
+
+.prompt-card-text {
+    flex: 1;
+    font-size: 0.85rem;
+    color: #334155;
+    line-height: 1.5;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    margin: 0;
+}
+
+.prompt-bookmark-btn {
+    background: none;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    color: #FF8C00;
+    font-size: 1rem;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.prompt-bookmark-btn:hover:not(:disabled) {
+    background: rgba(255, 140, 0, 0.1);
+}
+
+.prompt-bookmark-btn.saved {
+    color: #FF8C00;
+    border-color: #FF8C00;
+    cursor: default;
+}
+
+/* PARTICELLE */
+.particles-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.dynamic-stat-table td {
+    color: #001f3f !important; /* Forza il blu scuro sul foglio bianco */
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.stat-key {
+    text-align: left;
+    min-width: 100px;
+}
+
+.stat-val {
+    text-align: right;
+    min-width: 60px;
+    display: table-cell; /* Assicura che si comporti come cella */
+}

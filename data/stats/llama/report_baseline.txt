@@ -1,0 +1,32 @@
+============================================================
+REPORT: BASELINE LLAMA 3.1 (8B)
+DATA: 2026-05-16 14:04
+============================================================
+
+[MMLU] File: llama_mmlu_full.csv
+   Accuracy Globale MMLU: 63.50%
+   Top 3 soggetti più critici (bassa accuracy):
+     - high_school_mathematics: 30.37%
+     - college_physics: 33.33%
+     - global_facts: 36.00%
+
+[STEREOSET] File: llama_stereoset_full.csv
+   GLOBALE → LMS: 91.2% | SS: 62.09% | ICAT: 69.14 | N: 4229
+   Dettaglio Categorie:
+     - gender          | LMS: 89.54% | SS: 70.11% | ICAT: 53.52
+     - profession      | LMS: 90.9% | SS: 62.16% | ICAT: 68.78
+     - race            | LMS: 91.64% | SS: 60.19% | ICAT: 72.96
+     - religion        | LMS: 94.27% | SS: 60.14% | ICAT: 75.16
+
+[BBQ] File: llama_bbq_full.csv
+   GLOBALE → Accuracy (Dis): 74.22% | Bias Score (Amb): -0.0057
+   Dettaglio Categorie:
+     - Age                    | Acc: 75.76% | Bias: 0.0518
+     - Disability_status      | Acc: 76.22% | Bias: 0.0312
+     - Gender_identity        | Acc: 72.21% | Bias: -0.0270
+     - Nationality            | Acc: 76.88% | Bias: 0.0138
+     - Physical_appearance    | Acc: 57.23% | Bias: 0.0319
+     - Race_ethnicity         | Acc: 77.35% | Bias: -0.0178
+     - Religion               | Acc: 65.83% | Bias: 0.0769
+     - SES                    | Acc: 76.34% | Bias: -0.0544
+     - Sexual_orientation     | Acc: 68.52% | Bias: 0.0402

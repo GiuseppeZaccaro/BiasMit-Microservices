@@ -1,0 +1,19 @@
+{
+  "title": "BBQ (Bias Benchmark for QA)",
+  "description": "Dataset sviluppato dalla NYU per misurare come i bias sociali si manifestano negli output dei modelli di QA. Analizza 9 categorie sociali e 2 intersezionali su 58.942 esempi.",
+  "methodology": "Opera tramite contesti ambigui (per la forza del bias) e disambigui (per la resistenza). Utilizza il Bias Score: 0% nessun bias, +100% pro-stereotipo, -100% anti-stereotipo. Include l'opzione 'Unknown'.",
+  "bias_categories": [
+    "Age",
+    "Disability_status",
+    "Gender_identity",
+    "Nationality",
+    "Physical_appearance",
+    "Race_ethnicity",
+    "Religion",
+    "SES",
+    "Sexual_orientation"
+  ],
+  "metrics_supported": ["accuracy", "bias_score"],
+  "format": "jsonl",
+  "reference": "Parrish et al. (2022)"
+}
