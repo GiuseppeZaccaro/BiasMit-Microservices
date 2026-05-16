@@ -1,199 +1,201 @@
-# BiasMit: Activation Steering Framework for LLM De-biasing
+# BiasMit: Framework di Activation Steering per il De-biasing degli LLM
 
-> **A production-grade microservices platform for testing, measuring, and comparing Activation Steering techniques — CAA and FairSteer — on Decoder-Only Transformer models, with the goal of reducing sociolinguistic bias without degrading general language capabilities.**
+> **Una piattaforma a microservizi production-grade per testare, misurare e confrontare tecniche di Activation Steering — CAA e FairSteer — su modelli Transformer Decoder-Only, con l'obiettivo di ridurre i bias sociolinguistici senza degradare le capacità linguistiche generali.**
 
-BiasMit operationalises cutting-edge mechanistic interpretability research into a fully dockerised, observatory-grade system. It computes steering vectors from contrastive activations, injects them at inference time, and evaluates their effect across three independent benchmarks (BBQ, StereoSet, MMLU) — producing both quantitative dashboards and expert AI-generated qualitative analyses via an LLM-as-a-Judge pipeline.
+BiasMit trasforma la ricerca all'avanguardia sull'interpretabilità meccanicistica in un sistema completamente dockerizzato di livello osservatorio. Calcola vettori di steering a partire da attivazioni contrastive, li inietta durante l'inferenza e ne valuta l'effetto su tre benchmark indipendenti (BBQ, StereoSet, MMLU) — producendo sia dashboard quantitativi che analisi qualitative generate da un'IA esperta tramite una pipeline LLM-as-a-Judge.
 
 ---
 
-## 🚀 Core Features
+## 🚀 Funzionalità Principali
 
-| Feature | Description |
+| Funzionalità | Descrizione |
 |---|---|
-| **Multi-Model Support** | Plug-and-play model registry via `models.yaml`. Currently ships with **Mistral 7B v0.1** and **Llama 3.1 8B Instruct**. New models are added in minutes — no code changes required. |
-| **Advanced Steering** | Two de-biasing methods implemented: **CAA** (Contrastive Activation Addition — static vector injection) and **FairSteer** (dynamic orthogonal projection with calibrated intensity parameter *k*). |
-| **Expert AI Analysis** | Results are automatically interpreted by an **LLM-as-a-Judge** module powered by Groq LPU infrastructure (`temperature=0.2`, `max_tokens=1200`), generating structured 4-section academic reports. |
-| **Quantitative Benchmarking** | Full dashboard with interactive Recharts visualisations covering **BBQ** (9 demographic categories), **StereoSet** (LMS, SS, ICAT across 4 domains), and **MMLU** (57 academic subjects). |
-| **Zero-Retraining Approach** | All interventions are **runtime-only**: model weights are never modified. Steering is applied as a pure forward-pass operation at intermediate layers — reversible, lightweight, and architecture-agnostic. |
+| **Supporto Multi-Modello** | Registro modelli plug-and-play tramite `models.yaml`. Attualmente include **Mistral 7B v0.1** e **Llama 3.1 8B Instruct**. Nuovi modelli vengono aggiunti in pochi minuti — senza modifiche al codice. |
+| **Steering Avanzato** | Due metodi di de-biasing implementati: **CAA** (Contrastive Activation Addition — iniezione di vettore statico) e **FairSteer** (proiezione ortogonale dinamica con parametro di intensità calibrato *k*). |
+| **Analisi IA Esperta** | I risultati vengono interpretati automaticamente da un modulo **LLM-as-a-Judge** alimentato dall'infrastruttura Groq LPU (`temperature=0.2`, `max_tokens=1200`), che genera report accademici strutturati in 4 sezioni. |
+| **Benchmarking Quantitativo** | Dashboard completo con visualizzazioni interattive Recharts che coprono **BBQ** (9 categorie demografiche), **StereoSet** (LMS, SS, ICAT su 4 domini) e **MMLU** (57 materie accademiche). |
+| **Approccio Zero-Retraining** | Tutti gli interventi sono **solo a runtime**: i pesi del modello non vengono mai modificati. Lo steering è applicato come pura operazione di forward-pass a livelli intermedi — reversibile, leggero e agnostico all'architettura. |
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ Architettura del Sistema
 
-BiasMit is composed of **six independent microservices** orchestrated via Docker Compose, communicating exclusively over HTTP/REST on an isolated bridge network.
+BiasMit è composto da **sei microservizi indipendenti** orchestrati tramite Docker Compose, che comunicano esclusivamente via HTTP/REST su una rete bridge isolata.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│                 REACT FRONTEND  (Vite · Recharts)            │
-│                      Nginx · localhost:5173                  │
+│              FRONTEND REACT  (Vite · Recharts)               │
+│                    Nginx · localhost:5173                    │
 └──────────────────────────────┬───────────────────────────────┘
                                │  HTTP / REST
 ┌──────────────────────────────▼───────────────────────────────┐
-│              SPRING BOOT GATEWAY  (Java 17 · JPA)            │
+│            GATEWAY SPRING BOOT  (Java 17 · JPA)              │
 │               PostgreSQL  ·  localhost:8080                  │
 └──────────┬────────────────────┬──────────────────┬───────────┘
            │                    │                  │
      ┌─────▼──────┐      ┌──────▼──────┐    ┌─────▼──────────┐
-     │ INFERENCE  │      │  ANALYTICS  │    │ INTERPRETATION │
+     │ INFERENZA  │      │  ANALYTICS  │    │ INTERPRETAZIONE│
      │  :8000     │      │   :8001     │    │    :8002       │
      │  FastAPI   │      │   FastAPI   │    │   FastAPI      │
      │  Pandas    │      │   Regex     │    │   Groq LPU     │
-     │  PyArrow   │      │   Parser    │    │   LLM-as-Judge │
+     │  PyArrow   │      │   Parser    │    │  LLM-as-Judge  │
      └─────┬──────┘      └──────┬──────┘    └─────┬──────────┘
            │                    │                  │
 ┌──────────▼────────────────────▼──────────────────▼───────────┐
-│                   DATA LAYER  (Docker Volume)                 │
+│                  LIVELLO DATI  (Volume Docker)                │
 │   data/datasets/  ·  data/results/  ·  data/stats/           │
 │        BBQ (.jsonl)  ·  StereoSet (.arrow)  ·  CSV + TXT     │
 └───────────────────────────────────────────────────────────────┘
                                │
 ┌──────────────────────────────▼───────────────────────────────┐
 │              POSTGRESQL  (postgres:15)  ·  :5432             │
-│                     Bookmark persistence                     │
+│                   Persistenza Bookmark                       │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-### Service Responsibilities
+### Responsabilità dei Servizi
 
-| Service | Port | Technology | Role |
+| Servizio | Porta | Tecnologia | Ruolo |
 |---|---|---|---|
-| **Frontend** | 5173 | React 18, Vite, Recharts, Nginx | SPA served by Nginx; single entry point for all user interaction |
-| **Gateway** | 8080 | Spring Boot 3, Java 17, JPA | Centralised reverse proxy; routes all API calls; manages Bookmark persistence on PostgreSQL |
-| **Inference Service** | 8000 | FastAPI, Pandas, PyArrow | Serves raw dataset samples (BBQ, StereoSet, MMLU); reads pre-computed result CSVs |
-| **Analytics Service** | 8001 | FastAPI, Python `re` | Parses statistical report `.txt` files; exposes Recharts-ready JSON for all chart endpoints |
-| **Interpretation Service** | 8002 | FastAPI, Groq Python SDK | Builds structured prompts from metric deltas; calls Groq API; returns 4-section academic analysis |
-| **Database** | 5432 | PostgreSQL 15 | Stores user-saved model comparisons (Bookmarks) via Spring JPA |
+| **Frontend** | 5173 | React 18, Vite, Recharts, Nginx | SPA servita da Nginx; unico punto d'accesso per tutte le interazioni utente |
+| **Gateway** | 8080 | Spring Boot 3, Java 17, JPA | Reverse proxy centralizzato; instrada tutte le chiamate API; gestisce la persistenza dei Bookmark su PostgreSQL |
+| **Servizio Inferenza** | 8000 | FastAPI, Pandas, PyArrow | Fornisce campioni grezzi dei dataset (BBQ, StereoSet, MMLU); legge i CSV dei risultati pre-calcolati |
+| **Servizio Analytics** | 8001 | FastAPI, Python `re` | Analizza i file di report statistici `.txt`; espone JSON Recharts-ready per tutti gli endpoint dei grafici |
+| **Servizio Interpretazione** | 8002 | FastAPI, Groq Python SDK | Costruisce prompt strutturati dai delta delle metriche; chiama le API Groq; restituisce analisi accademica in 4 sezioni |
+| **Database** | 5432 | PostgreSQL 15 | Memorizza i confronti tra modelli salvati dall'utente (Bookmark) tramite Spring JPA |
 
-### Shared Infrastructure
+### Infrastruttura Condivisa
 
-All Python services mount two shared read-only volumes at startup:
+Tutti i servizi Python montano due volumi condivisi in sola lettura all'avvio:
 
 ```yaml
 volumes:
-  - ./shared/config_manager.py:/app/config_manager.py:ro   # Model registry logic
-  - ./shared/models.yaml:/app/models.yaml:ro               # Model & result definitions
-  - ./data:/app/data                                       # Datasets, results, stats
+  - ./shared/config_manager.py:/app/config_manager.py:ro   # Logica del registro modelli
+  - ./shared/models.yaml:/app/models.yaml:ro               # Definizioni modelli e risultati
+  - ./data:/app/data                                       # Dataset, risultati, statistiche
 ```
 
-This design ensures **single-source-of-truth configuration**: updating `models.yaml` immediately affects all three Python services without rebuilding any image.
+Questo design garantisce una **configurazione con unica fonte di verità**: aggiornare `models.yaml` ha effetto immediato su tutti e tre i servizi Python senza ricostruire nessuna immagine.
 
 ---
 
-## 🧠 Scientific Background
+## 🧠 Contesto Scientifico
 
-### Activation Steering in Latent Space
+### Activation Steering nello Spazio Latente
 
-Large Language Models encode semantic concepts — including stereotyped associations absorbed from pre-training corpora — as high-dimensional vectors in a latent activation space. Research in mechanistic interpretability has established that this space is **approximately linear for many high-level concepts**: the difference between activations produced by biased and unbiased prompts defines a geometric direction corresponding to the bias.
+I Large Language Model codificano concetti semantici — incluse le associazioni stereotipate assorbite dai corpus di pre-training — come vettori ad alta dimensionalità in uno spazio di attivazione latente. La ricerca sull'interpretabilità meccanicistica ha stabilito che questo spazio è **approssimativamente lineare per molti concetti di alto livello**: la differenza tra le attivazioni prodotte da prompt biased e unbiased definisce una direzione geometrica corrispondente al bias.
 
-**Activation Steering** exploits this property to redirect model behaviour at inference time, without retraining. An intervention vector is computed offline from contrastive examples and added to the hidden states at a target intermediate layer *L* during autoregressive generation. Intermediate layers (approximately 30–60% of total network depth) are targeted because they carry the highest density of semantic and relational information.
+L'**Activation Steering** sfrutta questa proprietà per riorientare il comportamento del modello durante l'inferenza, senza riaddestrarlo. Un vettore di intervento viene calcolato offline a partire da esempi contrastivi e aggiunto agli stati nascosti a un livello intermedio target *L* durante la generazione autoregressiva. I livelli intermedi (circa 30–60% della profondità totale della rete) sono scelti perché portano la maggiore densità di informazioni semantiche e relazionali.
 
-### Implemented Methods
+### Metodi Implementati
 
 #### CAA — Contrastive Activation Addition
-A **static** steering approach. Given *N* pairs of contrastive prompts (unbiased vs. stereotyped, syntactically equivalent), the mean activation difference at layer *L* defines a permanent steering vector. This vector is added with a scalar coefficient *α* to the hidden state at every generation step — a fixed compass bearing pointing away from bias.
 
-#### FairSteer — Dynamic Fairness Steering
-An **adaptive** steering approach. Rather than applying a constant correction, FairSteer measures the projection of the current token's hidden state onto the bias direction and subtracts a fraction *k* of that projection. The correction is therefore proportional to the actual bias present in the specific instance — acting only when and where needed, minimising interference with already-neutral generations.
+Un approccio di steering **statico**. Dati *N* coppie di prompt contrastivi (unbiased vs. stereotipato, sintatticamente equivalenti), la differenza media delle attivazioni al livello *L* definisce un vettore di steering permanente. Questo vettore viene aggiunto con un coefficiente scalare *α* allo stato nascosto ad ogni passo di generazione — una bussola fissa che punta lontano dal bias.
 
-### Evaluation Benchmarks
+#### FairSteer — Steering Dinamico per la Fairness
 
-| Benchmark | What it measures | Key metrics |
+Un approccio di steering **adattivo**. Invece di applicare una correzione costante, FairSteer misura la proiezione dello stato nascosto del token corrente sulla direzione di bias e ne sottrae una frazione *k*. La correzione è quindi proporzionale al bias effettivamente presente nell'istanza specifica — agisce solo quando e dove necessario, minimizzando le interferenze con le generazioni già neutrali.
+
+### Benchmark di Valutazione
+
+| Benchmark | Cosa misura | Metriche chiave |
 |---|---|---|
-| **BBQ** | Social bias in ambiguous QA (9 demographic categories) | `Accuracy (Dis)` ↑, `Bias Score` → 0 |
-| **StereoSet** | Stereotyped word associations across 4 bias domains | `LMS` ↑, `SS` → 50%, `ICAT` ↑ |
-| **MMLU** | General academic knowledge across 57 subjects | `Accuracy` — target: ΔMMLU ≈ 0 (no regression) |
+| **BBQ** | Bias sociale in QA ambigui (9 categorie demografiche) | `Accuracy (Dis)` ↑, `Bias Score` → 0 |
+| **StereoSet** | Associazioni di parole stereotipate in 4 domini di bias | `LMS` ↑, `SS` → 50%, `ICAT` ↑ |
+| **MMLU** | Conoscenza accademica generale in 57 materie | `Accuracy` — obiettivo: ΔMMLU ≈ 0 (nessuna regressione) |
 
-> **ΔMMLU** is the arbitration metric: a successful de-biasing intervention leaves MMLU unchanged. A significant drop indicates over-aggressive steering and polysemantic circuit interference.
+> **ΔMMLU** è la metrica arbitrale: un intervento di de-biasing riuscito lascia l'MMLU invariato. Un calo significativo indica uno steering troppo aggressivo e interferenza con i circuiti polisemantici.
 
 ---
 
-## 📦 Installation & Quick Start
+## 📦 Installazione e Avvio Rapido
 
-### Prerequisites
+### Prerequisiti
 
 - **Docker** ≥ 24.0
 - **Docker Compose** ≥ 2.20
-- A **Groq API key** (free tier sufficient) — obtain at [console.groq.com](https://console.groq.com)
+- Una **chiave API Groq** (il piano gratuito è sufficiente) — ottenibile su [console.groq.com](https://console.groq.com)
 
-### 1. Clone the repository
+### 1. Clona il repository
 
 ```bash
-git clone https://github.com/<your-username>/BiasMit-Microservices-1.git
+git clone https://github.com/<tuo-username>/BiasMit-Microservices-1.git
 cd BiasMit-Microservices-1
 ```
 
-### 2. Configure environment variables
+### 2. Configura le variabili d'ambiente
 
-Copy the template and fill in your credentials:
+Copia il template e inserisci le tue credenziali:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env`:
+Modifica `.env`:
 
 ```dotenv
-# ── Groq LLM (required for AI interpretation) ─────────────────────────────
+# ── Groq LLM (necessario per l'interpretazione IA) ────────────────────────
 LLM_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 LLM_MODEL=llama-3.1-8b-instant
 
-# ── PostgreSQL (change in production) ─────────────────────────────────────
+# ── PostgreSQL (modificare in produzione) ─────────────────────────────────
 POSTGRES_USER=user
 POSTGRES_PASSWORD=password
 POSTGRES_DB=bias_db
 ```
 
-### 3. Build and start all services
+### 3. Costruisci e avvia tutti i servizi
 
 ```bash
 docker compose up -d --build
 ```
 
-Docker Compose will build and start all six containers in dependency order. The full build takes approximately **3–5 minutes** on first run (image layer caching applies on subsequent builds).
+Docker Compose costruirà e avvierà tutti e sei i container nell'ordine corretto di dipendenza. La prima build richiede circa **3–5 minuti** (il caching dei layer si applica alle build successive).
 
-### 4. Verify health
+### 4. Verifica lo stato
 
 ```bash
 docker compose ps
 ```
 
-All services should report `running`. Access the application:
+Tutti i servizi dovrebbero risultare `running`. Accedi all'applicazione:
 
 | Endpoint | URL |
 |---|---|
-| **Frontend Dashboard** | http://localhost:5173 |
-| **Spring Boot Gateway** | http://localhost:8080 |
-| **Inference API (Swagger)** | http://localhost:8000/docs |
-| **Analytics API (Swagger)** | http://localhost:8001/docs |
-| **Interpretation API (Swagger)** | http://localhost:8002/docs |
+| **Dashboard Frontend** | http://localhost:5173 |
+| **Gateway Spring Boot** | http://localhost:8080 |
+| **API Inferenza (Swagger)** | http://localhost:8000/docs |
+| **API Analytics (Swagger)** | http://localhost:8001/docs |
+| **API Interpretazione (Swagger)** | http://localhost:8002/docs |
 
-### 5. Stop the stack
+### 5. Ferma lo stack
 
 ```bash
-docker compose down          # Stop containers (data persisted in volumes)
-docker compose down -v       # Stop and delete all volumes (full reset)
+docker compose down          # Ferma i container (dati persistiti nei volumi)
+docker compose down -v       # Ferma ed elimina tutti i volumi (reset completo)
 ```
 
 ---
 
-## 🔌 Extensibility
+## 🔌 Estensibilità
 
-One of BiasMit's core design principles is **model and dataset agnosticism**. Adding a new model or dataset requires no code changes — only configuration and data files.
+Uno dei principi cardine di BiasMit è l'**agnosticismo rispetto a modelli e dataset**. Aggiungere un nuovo modello o dataset non richiede modifiche al codice — solo file di configurazione e dati.
 
-### Adding a New Model
+### Aggiungere un Nuovo Modello
 
-Append an entry to `shared/models.yaml`:
+Aggiungi una voce a `shared/models.yaml`:
 
 ```yaml
 models:
-  - id: qwen                                # unique identifier (lowercase)
+  - id: qwen                                # identificatore univoco (minuscolo)
     name: "Qwen 2.5 7B Instruct"
     architecture: "Dense Transformer"
     details: >
-      28 residual layers, Hidden Size 3584. GQA with 4 KV heads.
-      SwiGLU activation, RoPE positional encoding.
+      28 livelli residuali, Hidden Size 3584. GQA con 4 KV heads.
+      Attivazione SwiGLU, codifica posizionale RoPE.
     steering_type: "categoriale"
-    layers: [14]                             # target steering layer(s)
+    layers: [14]                             # livello/i di steering target
     results:
       bbq:
         baseline:     "qwen/baseline_bbq_full.csv"
@@ -205,136 +207,124 @@ models:
         fairsteer:    "qwen/risultati_ss_FairSteer_L14_categoriale_k_ss-0.5.csv"
 ```
 
-Then drop the corresponding CSV files into `data/results/qwen/` and the statistical report files into `data/stats/qwen/`. **No container rebuild required** — all services re-read the config on each request.
+Poi copia i CSV corrispondenti in `data/results/qwen/` e i file di report statistici in `data/stats/qwen/`. **Non è necessario ricostruire i container** — tutti i servizi rileggono la configurazione ad ogni richiesta.
 
-### Adding a New Dataset
+### Aggiungere un Nuovo Dataset
 
-1. Place dataset files in `data/datasets/<dataset-name>/`
-2. Add a `metadata.json` descriptor:
+1. Inserisci i file del dataset in `data/datasets/<nome-dataset>/`
+2. Aggiungi un descrittore `metadata.json`:
 
 ```json
 {
-  "id": "my-dataset",
-  "name": "My Bias Benchmark",
+  "id": "mio-dataset",
+  "name": "Il Mio Benchmark di Bias",
   "description": "...",
   "format": "jsonl",
-  "file": "examples.jsonl",
-  "categories": ["category_a", "category_b"]
+  "file": "esempi.jsonl",
+  "categories": ["categoria_a", "categoria_b"]
 }
 ```
 
-The Inference Service auto-discovers all datasets with a valid `metadata.json` and exposes them via the `/datasets` endpoint immediately.
+Il Servizio di Inferenza rileva automaticamente tutti i dataset con un `metadata.json` valido e li espone immediatamente tramite l'endpoint `/datasets`.
 
-### Statistical Reports (Analytics)
+### Report Statistici (Analytics)
 
-The Analytics Service ingests free-text `.txt` report files from `data/stats/<model>/report_<method>.txt`. Reports must conform to the expected format (regex-parsed fields):
+Il Servizio Analytics legge file di report in testo libero `.txt` da `data/stats/<modello>/report_<metodo>.txt`. I report devono rispettare il formato atteso (campi analizzati tramite regex):
 
 ```
 [MMLU] Accuracy Globale MMLU: 49.28%
 [STEREOSET] GLOBALE → LMS: 91.96% | SS: 65.21% | ICAT: 63.99
 [BBQ] GLOBALE → Accuracy (Dis): 29.97% | Bias Score (Amb): -0.0027
-  - CategoryName | Acc: 28.04% | Bias: -0.009
+  - NomeCategoria | Acc: 28.04% | Bias: -0.009
 ```
 
-Any method key discovered as `report_<key>.txt` is automatically registered without any configuration.
+Qualsiasi chiave di metodo trovata come `report_<chiave>.txt` viene registrata automaticamente senza alcuna configurazione aggiuntiva.
 
 ---
 
-## 📊 Experimental Results (Snapshot)
+## 📊 Risultati Sperimentali (Snapshot)
 
-Results for the two models currently registered in the platform:
+Risultati per i due modelli attualmente registrati nella piattaforma:
 
-### Mistral 7B v0.1 — 32 layers · Hidden size 4096 · Steering @ L16
+### Mistral 7B v0.1 — 32 livelli · Hidden size 4096 · Steering @ L16
 
-| Method | BBQ Bias Score | StereoSet SS | ICAT | MMLU Acc |
+| Metodo | BBQ Bias Score | StereoSet SS | ICAT | MMLU Acc |
 |---|---|---|---|---|
 | Baseline | -0.0027 | 65.21% | 63.99 | 49.28% |
 | CAA Puntuale | +0.0018 | 67.18% | 60.44 | 48.29% |
 | FairSteer (k=−0.5) | -0.0025 | 65.21% | 63.99 | 49.27% |
 
-### Llama 3.1 8B Instruct — 32 layers · Hidden size 4096 · Steering @ L16
+### Llama 3.1 8B Instruct — 32 livelli · Hidden size 4096 · Steering @ L16
 
-| Method | BBQ Bias Score | StereoSet SS | ICAT | MMLU Acc |
+| Metodo | BBQ Bias Score | StereoSet SS | ICAT | MMLU Acc |
 |---|---|---|---|---|
 | Baseline | -0.0057 | 62.09% | 69.14 | 63.50% |
 | CAA Puntuale | — | — | — | — |
 | FairSteer (k=−0.5) | — | — | — | — |
 
-> Full per-category breakdowns are available in the interactive dashboard at `localhost:5173/comparison`.
+> I dettagli per categoria sono disponibili nel dashboard interattivo su `localhost:5173/comparison`.
 
 ---
 
-## 🛠️ Technology Stack
+## 🛠️ Stack Tecnologico
 
-| Category | Technology | Version | Role |
+| Categoria | Tecnologia | Versione | Ruolo |
 |---|---|---|---|
-| **Frontend** | React | 18 | Component-based SPA |
-| **Frontend** | Vite | 6 | Build tool & dev server |
-| **Frontend** | Recharts | 2 | Interactive chart library |
-| **Frontend** | React Router | 6 | Client-side navigation |
-| **Frontend** | Nginx | 1.25 | Production static file server |
-| **Gateway** | Spring Boot | 3 | REST API gateway & orchestration layer |
+| **Frontend** | React | 18 | SPA basata su componenti |
+| **Frontend** | Vite | 6 | Build tool e server di sviluppo |
+| **Frontend** | Recharts | 2 | Libreria per grafici interattivi |
+| **Frontend** | React Router | 6 | Navigazione lato client |
+| **Frontend** | Nginx | 1.25 | Server di file statici in produzione |
+| **Gateway** | Spring Boot | 3 | Gateway REST API e livello di orchestrazione |
 | **Gateway** | Java | 17 | Runtime |
-| **Gateway** | Spring JPA | 3 | ORM for PostgreSQL persistence |
-| **Inference** | FastAPI | 0.115 | Async REST API |
-| **Inference** | Pandas | 2 | CSV result ingestion |
-| **Inference** | PyArrow | 17 | StereoSet `.arrow` binary format |
-| **Analytics** | FastAPI | 0.115 | Async REST API |
-| **Analytics** | Python `re` | stdlib | Regex-based report parser |
-| **Interpretation** | FastAPI | 0.115 | Async REST API |
-| **Interpretation** | Groq Python SDK | 0.13 | LPU-accelerated LLM inference |
-| **Database** | PostgreSQL | 15 | Bookmark persistence |
-| **Infrastructure** | Docker | ≥ 24 | Container runtime |
-| **Infrastructure** | Docker Compose | ≥ 2.20 | Multi-service orchestration |
-| **Configuration** | PyYAML | 6 | `models.yaml` registry parsing |
+| **Gateway** | Spring JPA | 3 | ORM per la persistenza su PostgreSQL |
+| **Inferenza** | FastAPI | 0.115 | API REST asincrona |
+| **Inferenza** | Pandas | 2 | Ingestione dei risultati CSV |
+| **Inferenza** | PyArrow | 17 | Formato binario `.arrow` di StereoSet |
+| **Analytics** | FastAPI | 0.115 | API REST asincrona |
+| **Analytics** | Python `re` | stdlib | Parser di report basato su regex |
+| **Interpretazione** | FastAPI | 0.115 | API REST asincrona |
+| **Interpretazione** | Groq Python SDK | 0.13 | Inferenza LLM accelerata da LPU |
+| **Database** | PostgreSQL | 15 | Persistenza dei Bookmark |
+| **Infrastruttura** | Docker | ≥ 24 | Runtime per container |
+| **Infrastruttura** | Docker Compose | ≥ 2.20 | Orchestrazione multi-servizio |
+| **Configurazione** | PyYAML | 6 | Parsing del registro `models.yaml` |
 
 ---
 
-## 📂 Repository Structure
+## 📂 Struttura del Repository
 
 ```
 BiasMit-Microservices-1/
 │
-├── shared/                         # Shared config (volume-mounted across all Python services)
-│   ├── models.yaml                 # Model registry — single source of truth
-│   └── config_manager.py           # Registry parsing utilities
+├── shared/                         # Configurazione condivisa (montata in tutti i servizi Python)
+│   ├── models.yaml                 # Registro modelli — unica fonte di verità
+│   └── config_manager.py           # Utilità per il parsing del registro
 │
 ├── data/
-│   ├── datasets/                   # Raw benchmark datasets
+│   ├── datasets/                   # Dataset benchmark grezzi
 │   │   ├── bbq/                    # BBQ .jsonl + metadata
 │   │   └── stereoset/              # StereoSet .arrow + metadata
-│   ├── results/                    # Pre-computed inference results (CSV)
+│   ├── results/                    # Risultati di inferenza pre-calcolati (CSV)
 │   │   ├── mistral/
 │   │   └── llama/
-│   └── stats/                      # Statistical reports (TXT, regex-parseable)
+│   └── stats/                      # Report statistici (TXT, analizzabili via regex)
 │       ├── mistral/
 │       └── llama/
 │
-├── ai-inference-mock/              # Inference Service (FastAPI · :8000)
-├── analytics-service/              # Analytics Service (FastAPI · :8001)
-├── ai-interpretation-service/      # Interpretation Service (FastAPI · Groq · :8002)
-├── bias-mit-gateway/               # Spring Boot Gateway (:8080)
-├── frontend/                       # React SPA (Vite · Nginx · :5173)
+├── ai-inference-mock/              # Servizio Inferenza (FastAPI · :8000)
+├── analytics-service/              # Servizio Analytics (FastAPI · :8001)
+├── ai-interpretation-service/      # Servizio Interpretazione (FastAPI · Groq · :8002)
+├── bias-mit-gateway/               # Gateway Spring Boot (:8080)
+├── frontend/                       # SPA React (Vite · Nginx · :5173)
 │
-└── docker-compose.yml              # Full-stack orchestration
+└── docker-compose.yml              # Orchestrazione dell'intero stack
 ```
 
 ---
 
-## 🔬 Research Context
+## 🔬 Contesto della Ricerca
 
-BiasMit was developed as part of a Software Engineering Evolution course project. It engineers the operationalisation of recent Activation Steering research — specifically the CAA method introduced by *Steering Language Models with Activation Engineering* (Zou et al., 2023) and the dynamic steering paradigm of FairSteer — into a reproducible, extensible evaluation platform.
+BiasMit è stato sviluppato nell'ambito di un progetto per il corso di Evoluzione del Software. Ingegnerizza l'operazionalizzazione della ricerca recente sull'Activation Steering — in particolare il metodo CAA introdotto da *Steering Language Models with Activation Engineering* (Zou et al., 2023) e il paradigma di steering dinamico di FairSteer — in una piattaforma di valutazione riproducibile ed estensibile.
 
-The system deliberately simulates inference results (pre-computed CSVs) rather than performing live model inference, enabling full stack demonstration on consumer hardware without GPU requirements. The architecture is designed so that a live inference backend (e.g., vLLM, Ollama, llama.cpp) can be substituted for the mock service with minimal interface changes.
-
----
-
-## 📄 License
-
-This project is released for academic and educational use. See `LICENSE` for details.
-
----
-
-<div align="center">
-  <sub>Built with precision · Evaluated with rigour · Steered with fairness</sub>
-</div>
+Il sistema simula deliberatamente i risultati di inferenza (tramite CSV pre-calcolati) invece di eseguire inferenza live sui modelli, consentendo la dimostrazione dell'intero stack su hardware consumer senza requisiti GPU. L'architettura è progettata in modo che un backend di inferenza live (es. vLLM, Ollama, llama.cpp) possa sostituire il servizio mock con modifiche minime all'interfaccia.
