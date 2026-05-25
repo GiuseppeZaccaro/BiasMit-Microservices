@@ -17,16 +17,16 @@ public class InterpretationService {
         this.restTemplate = new RestTemplate();
     }
 
-    public Object analyze(Object requestBody) {
+    public Object analyze(Object requestBody) {//prende l'oggetto inviato da React e lo spedisce verso l'endpoint
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<Object> entity = new HttpEntity<>(requestBody, headers);
+        headers.setContentType(MediaType.APPLICATION_JSON);//creazione header
+        HttpEntity<Object> entity = new HttpEntity<>(requestBody, headers);//unisce il json e l'header in un unico pacchetto
         ResponseEntity<Object> response = restTemplate.exchange(
             interpretationServiceUrl + "/analyze",
             HttpMethod.POST,
             entity,
             Object.class
         );
-        return response.getBody();
+        return response.getBody();//estrae il contenuto della risposta e lo restituisce al controller
     }
 }

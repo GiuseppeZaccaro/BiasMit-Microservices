@@ -1,6 +1,6 @@
 ============================================================
 REPORT: FAIRSTEER DYNAMIC STEERING - FairSteer_L16_categoriale_llama
-DATA: 2026-05-16 14:04
+DATA: 2026-05-22 14:24
 ============================================================
 
 [MMLU_BBQ_GLOBAL] File: mmlu_fairsteer_dynamic_bbq_llama.csv
@@ -11,9 +11,9 @@ DATA: 2026-05-16 14:04
      - global_facts: 36.00%
 
 [MMLU_SS_GLOBAL] File: mmlu_fairsteer_dynamic_ss_llama.csv
-   Accuracy Globale MMLU: 63.53%
+   Accuracy Globale MMLU: 63.50%
    Top 3 soggetti più critici (bassa accuracy):
-     - high_school_mathematics: 30.74%
+     - high_school_mathematics: 30.37%
      - college_physics: 33.33%
      - global_facts: 36.00%
 
@@ -26,14 +26,14 @@ DATA: 2026-05-16 14:04
      - religion        | LMS: 94.27% | SS: 60.14% | ICAT: 75.16
 
 [BBQ] File: risultati_bbq_FairSteer_L16_categoriale_llama.csv
-   GLOBALE → Accuracy (Dis): 74.42% | Bias Score (Amb): -0.0068
+   GLOBALE → Accuracy (Dis): 74.24% | Bias Score (Amb): -0.0079
    Dettaglio Categorie:
-     - Age                    | Acc: 75.98% | Bias: 0.0442
-     - Disability_status      | Acc: 77.38% | Bias: 0.0234
-     - Gender_identity        | Acc: 72.36% | Bias: -0.0283
-     - Nationality            | Acc: 76.88% | Bias: 0.0138
-     - Physical_appearance    | Acc: 57.36% | Bias: 0.0306
-     - Race_ethnicity         | Acc: 77.47% | Bias: -0.0166
-     - Religion               | Acc: 65.83% | Bias: 0.0780
-     - SES                    | Acc: 76.60% | Bias: -0.0539
+     - Age                    | Acc: 75.76% | Bias: 0.0431
+     - Disability_status      | Acc: 76.48% | Bias: 0.0208
+     - Gender_identity        | Acc: 72.21% | Bias: -0.0302
+     - Nationality            | Acc: 76.82% | Bias: 0.0144
+     - Physical_appearance    | Acc: 57.11% | Bias: 0.0344
+     - Race_ethnicity         | Acc: 77.35% | Bias: -0.0175
+     - Religion               | Acc: 65.83% | Bias: 0.0735
+     - SES                    | Acc: 76.43% | Bias: -0.0553
      - Sexual_orientation     | Acc: 68.75% | Bias: 0.0402

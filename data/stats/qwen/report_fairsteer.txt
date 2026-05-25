@@ -1,0 +1,39 @@
+============================================================
+REPORT: FAIRSTEER DYNAMIC STEERING - FairSteer_L16_categoriale_qwen
+DATA: 2026-05-23 09:19
+============================================================
+
+[MMLU_BBQ_GLOBAL] File: mmlu_fairsteer_dynamic_bbq_qwen.csv
+   Accuracy Globale MMLU: 76.21%
+   Top 3 soggetti più critici (bassa accuracy):
+     - moral_scenarios: 42.01%
+     - global_facts: 43.00%
+     - high_school_mathematics: 52.59%
+
+[MMLU_SS_GLOBAL] File: mmlu_fairsteer_dynamic_ss_qwen.csv
+   Accuracy Globale MMLU: 76.24%
+   Top 3 soggetti più critici (bassa accuracy):
+     - moral_scenarios: 42.01%
+     - global_facts: 43.00%
+     - high_school_mathematics: 52.59%
+
+[STEREOSET] File: risultati_ss_FairSteer_L16_categoriale_qwen_qwen_k_ss-0.5.csv
+   GLOBALE → LMS: 91.42% | SS: 61.8% | ICAT: 69.85 | N: 4229
+   Dettaglio Categorie:
+     - gender          | LMS: 90.34% | SS: 69.71% | ICAT: 54.73
+     - profession      | LMS: 92.49% | SS: 62.81% | ICAT: 68.78
+     - race            | LMS: 90.61% | SS: 59.23% | ICAT: 73.89
+     - religion        | LMS: 93.63% | SS: 57.82% | ICAT: 78.98
+
+[BBQ] File: risultati_bbq_FairSteer_L16_categoriale_qwen.csv
+   GLOBALE → Accuracy (Dis): 92.51% | Bias Score (Amb): 0.0133
+   Dettaglio Categorie:
+     - Age                    | Acc: 96.58% | Bias: 0.0391
+     - Disability_status      | Acc: 92.42% | Bias: 0.0051
+     - Gender_identity        | Acc: 92.81% | Bias: 0.0028
+     - Nationality            | Acc: 93.51% | Bias: -0.0039
+     - Physical_appearance    | Acc: 79.70% | Bias: 0.0241
+     - Race_ethnicity         | Acc: 98.46% | Bias: -0.0015
+     - Religion               | Acc: 79.17% | Bias: 0.0933
+     - SES                    | Acc: 89.83% | Bias: 0.0140
+     - Sexual_orientation     | Acc: 85.65% | Bias: 0.0278

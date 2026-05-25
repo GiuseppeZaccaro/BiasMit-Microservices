@@ -1,7 +1,12 @@
 models:
+  # Lista di tutti i modelli registrati nella piattaforma.
+  # Ogni elemento è un oggetto con campi standardizzati letti da config_manager.py.
   # =========================================================================
+
   # 1. MISTRAL 7B V0.1
+
   # =========================================================================
+
   - id: mistral
     name: "Mistral 7B v0.1"
     architecture: "Dense Transformer"
@@ -18,22 +23,26 @@ models:
         baseline:     "mistral/baseline_bbq_full.csv"
         caa_puntuale: "mistral/steered_bbq_L16_puntuale_categoriale.csv"
         fairsteer:    "mistral/risultati_bbq_FairSteer_L16_categoriale.csv"
+
       stereoset:
         baseline:     "mistral/baseline_stereoset_full.csv"
         caa_puntuale: "mistral/steered_stereoset_L16_puntuale_categoriale.csv"
         fairsteer:    "mistral/risultati_ss_FairSteer_L16_categoriale_k_ss-0.5.csv"
 
   # =========================================================================
+
   # 2. LLAMA 3.1 8B INSTRUCT
+
   # =========================================================================
+
   - id: llama
     name: "Llama 3.1 8B Instruct"
     architecture: "Dense Transformer"
     details: >
-      32 layer residui, Hidden Size (h_d) 4096. Utilizza Grouped Query Attention (GQA) su tutti gli 8B di parametri 
-      per ottimizzare il throughput di inferenza. Contesto nativo esteso a 128k token tramite RoPE scaling (costante di base a 500.000). 
-      Vocabolario: 128.256 token basato su Tiktoken. Note di Ricerca: Essendo una versione Instruct (sottoposta a SFT e RLHF intensivo), 
-      possiede già un solido allineamento di sicurezza nativo, rendendo l'analisi dello steering particolarmente interessante per valutare 
+      32 layer residui, Hidden Size (h_d) 4096. Utilizza Grouped Query Attention (GQA) su tutti gli 8B di parametri
+      per ottimizzare il throughput di inferenza. Contesto nativo esteso a 128k token tramite RoPE scaling (costante di base a 500.000).
+      Vocabolario: 128.256 token basato su Tiktoken. Note di Ricerca: Essendo una versione Instruct (sottoposta a SFT e RLHF intensivo),
+      possiede già un solido allineamento di sicurezza nativo, rendendo l'analisi dello steering particolarmente interessante per valutare
       l'interazione con barriere di sicurezza pre-esistenti.
     steering_type: "categoriale"
     layers: [16]
@@ -42,7 +51,42 @@ models:
         baseline:     "llama/baseline_bbq_full.csv"
         caa_puntuale: "llama/steered_bbq_L16_puntuale_categoriale.csv"
         fairsteer:    "llama/risultati_bbq_FairSteer_L16_categoriale.csv"
+
       stereoset:
         baseline:     "llama/baseline_stereoset_full.csv"
         caa_puntuale: "llama/steered_stereoset_L16_puntuale_categoriale.csv"
         fairsteer:    "llama/risultati_ss_FairSteer_L16_categoriale_k_ss-0.5.csv"
+
+  # =========================================================================
+
+  # 3. QWEN 3.5 9B
+
+  # =========================================================================
+
+  - id: qwen
+    name: "Qwen 3.5 9B"
+    architecture: "Hybrid (Gated DeltaNet + Sparse MoE)"
+    details: >
+      32 layer residui, Hidden Size (h_d) 4096. Architettura ibrida efficiente: reti Gated DeltaNet
+      combinate con una miscela sparsa di esperti (Mixture of Experts) per inferenze ad alta velocità
+      e costi computazionali ridotti. Vocabolario: 248.320 token (con riempimento), supporto nativo
+      per 201 lingue e dialetti. Finestra di contesto nativa di 262.144 token (estendibile fino a
+      1.010.000 tramite RoPE scaling con YaRN). Pre-addestrato e post-addestrato con apprendimento
+      multimodale in early fusion su token multimodali, Reinforcement Learning scalabile su milioni
+      di agenti e Multi-Token Prediction (MTP) su più fasi. Token di training: ~22 trilioni.
+      Note di Ricerca: allineamento molto elevato tramite RL scalabile, che crea una robusta maschera
+      di sicurezza. L'alta densità informativa e la stabilità delle associazioni apprese rendono lo
+      steering un test di resistenza su bias profondamente radicati. Lo spazio latente condiviso (4096)
+      con Llama e Mistral consente un confronto vettoriale diretto degli steering vectors.
+    steering_type: "categoriale"
+    layers: [16]
+    results:
+      bbq:
+        baseline:     "qwen/baseline_bbq_full.csv"
+        caa_puntuale: "qwen/steered_bbq_L16_puntuale_categoriale.csv"
+        fairsteer:    "qwen/risultati_bbq_FairSteer_L16_categoriale.csv"
+
+      stereoset:
+        baseline:     "qwen/baseline_stereoset_full.csv"
+        caa_puntuale: "qwen/steered_stereoset_L16_puntuale_categoriale.csv"
+        fairsteer:    "qwen/risultati_ss_FairSteer_L16_categoriale_k_ss-0.5.csv"

@@ -33,24 +33,37 @@ const ExpertAnalysis = () => {
     const [analyzing, setAnalyzing]       = useState(false);
     const [apiError, setApiError]         = useState('');
     const fetchedRef = useRef(new Set());
+    const isMountedRef = useRef(true);
+
+    useEffect(() => {
+        return () => { isMountedRef.current = false; };
+    }, []);
 
     const fetchModelAnalytics = useCallback((modelId) => {
         if (fetchedRef.current.has(modelId)) return;
         fetchedRef.current.add(modelId);
         setLoadingModels(prev => ({ ...prev, [modelId]: true }));
         getModelAnalytics(modelId)
-            .then(res => setAnalyticsMap(prev => ({ ...prev, [modelId]: res.data })))
+            .then(res => {
+                if (isMountedRef.current)
+                    setAnalyticsMap(prev => ({ ...prev, [modelId]: res.data }));
+            })
             .catch(() => {
                 fetchedRef.current.delete(modelId);
-                setApiError(`Impossibile caricare i dati per ${modelId}.`);
+                if (isMountedRef.current)
+                    setApiError(`Impossibile caricare i dati per ${modelId}.`);
             })
-            .finally(() => setLoadingModels(prev => ({ ...prev, [modelId]: false })));
+            .finally(() => {
+                if (isMountedRef.current)
+                    setLoadingModels(prev => ({ ...prev, [modelId]: false }));
+            });
     }, []);
 
     // Load model list once; pre-select and pre-fetch first model
     useEffect(() => {
         getModels()
             .then(res => {
+                if (!isMountedRef.current) return;
                 const list = res.data || [];
                 setModels(list);
                 if (list.length > 0) {
@@ -59,7 +72,9 @@ const ExpertAnalysis = () => {
                     fetchModelAnalytics(firstId);
                 }
             })
-            .catch(() => setApiError('Impossibile caricare i modelli.'));
+            .catch(() => {
+                if (isMountedRef.current) setApiError('Impossibile caricare i modelli.');
+            });
     }, [fetchModelAnalytics]);
 
     const toggleModel = (modelId) => {

@@ -9,11 +9,13 @@ const Home = () => {
 
     // Inizializza il motore delle particelle (Rete Neurale)
     useEffect(() => {
+        let isMounted = true;
         initParticlesEngine(async (engine) => {
             await loadSlim(engine);
         }).then(() => {
-            setInit(true);
+            if (isMounted) setInit(true);
         });
+        return () => { isMounted = false; };
     }, []);
 
     const particlesOptions = {

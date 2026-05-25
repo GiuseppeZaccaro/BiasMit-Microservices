@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useReducer } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
-    CartesianGrid, Tooltip, Legend, ReferenceLine,
+    ResponsiveContainer,
     RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+    Tooltip, Legend,
 } from 'recharts';
 import { getComparisonAnalytics } from '../services/api';
 import './ComparisonCharts.css';
@@ -58,33 +58,71 @@ const tooltipStyle = {
     formatter: (v, name) => [typeof v === 'number' ? v.toFixed(2) : v, name],
 };
 
-function dynamicBars(methods) {
-    return methods.map((m, i) => (
-        <Bar key={m} dataKey={m} fill={barColor(m, i)} radius={[4, 4, 0, 0]} maxBarSize={28} />
-    ));
+// ────────────────────────────────────────────────────────────────────────────
+// Small Multiples — per-model radar helpers
+// ────────────────────────────────────────────────────────────────────────────
+
+const RADAR_SHORT_LABELS = {
+    'BBQ Accuracy':  'BBQ Acc',
+    'StereoSet LMS': 'LMS',
+    'StereoSet SS':  'SS',
+    'ICAT Score':    'ICAT',
+    'MMLU Accuracy': 'MMLU',
+};
+
+function buildModelRadarData(models, radarData, methods) {
+    const isMulti = models.length > 1;
+    return models.map(mid => {
+        const modelMethods = isMulti
+            ? methods.filter(k => k.split(' — ')[0]?.toLowerCase().includes(mid.toLowerCase()))
+            : methods;
+        if (!modelMethods.length) return null;
+        const data = (radarData || []).map(row => {
+            const vals = modelMethods.map(k => row[k] ?? 0);
+            const avg  = vals.reduce((a, b) => a + b, 0) / vals.length;
+            return { metric: RADAR_SHORT_LABELS[row.metric] ?? row.metric, value: Math.round(avg * 10) / 10 };
+        });
+        return { modelId: mid, data };
+    }).filter(Boolean);
 }
 
-const bbqXAxis = (
-    <XAxis
-        dataKey="category"
-        tick={{ fill: '#94a3b8', fontSize: 11 }}
-        angle={-45}
-        textAnchor="end"
-        interval={0}
-        height={100}
-    />
-);
-
-const ssXAxis = (
-    <XAxis
-        dataKey="category"
-        tick={{ fill: '#94a3b8', fontSize: 11 }}
-        angle={-45}
-        textAnchor="end"
-        interval={0}
-        height={100}
-    />
-);
+function ModelRadarGrid({ models, radarData, methods }) {
+    const modelRadars = buildModelRadarData(models, radarData, methods);
+    if (!modelRadars.length) return null;
+    return (
+        <section className="comparison-section">
+            <h2 className="section-title">Panoramica per Modello — Small Multiples</h2>
+            <p className="section-desc">
+                Ogni radar visualizza il profilo medio del modello su 5 metriche chiave,
+                aggregato su tutti i metodi di de-biasing. Aree più estese indicano performance
+                globalmente migliori.
+            </p>
+            <div className="small-multiples-grid">
+                {modelRadars.map(({ modelId, data }) => {
+                    const palette = MODEL_PALETTES[modelId.toLowerCase()];
+                    const color   = palette ? palette['Baseline'] : FALLBACK_PALETTE[0];
+                    return (
+                        <div key={modelId} className="model-radar-card">
+                            <p className="model-radar-card-title">{modelId.toUpperCase()}</p>
+                            <ResponsiveContainer width="100%" height={200}>
+                                <RadarChart cx="50%" cy="50%" outerRadius="65%" data={data}>
+                                    <PolarGrid stroke="#1e3a5f" />
+                                    <PolarAngleAxis dataKey="metric" tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                                    <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
+                                    <Radar
+                                        dataKey="value"
+                                        stroke={color} fill={color}
+                                        fillOpacity={0.2} strokeWidth={2}
+                                    />
+                                </RadarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    );
+                })}
+            </div>
+        </section>
+    );
+}
 
 // ────────────────────────────────────────────────────────────────────────────
 // METRIC_EXPLANATIONS for the legend section
@@ -137,16 +175,18 @@ function ModelColorLegend({ models }) {
 
 const ComparisonCharts = () => {
     const navigate = useNavigate();
-    const [data, setData]       = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError]     = useState(null);
+    const [{ loading, data, error }, dispatch] = useReducer(
+        (_, a) => a,
+        { loading: true, data: null, error: null }
+    );
 
     useEffect(() => {
-        setLoading(true);
+        let isMounted = true;
+        dispatch({ loading: true, data: null, error: null });
         getComparisonAnalytics()
-            .then(res => setData(res.data))
-            .catch(() => setError('Impossibile caricare i dati di confronto.'))
-            .finally(() => setLoading(false));
+            .then(res => { if (isMounted) dispatch({ loading: false, data: res.data, error: null }); })
+            .catch(() => { if (isMounted) dispatch({ loading: false, data: null, error: 'Impossibile caricare i dati di confronto.' }); });
+        return () => { isMounted = false; };
     }, []);
 
     if (loading) return (
@@ -186,9 +226,12 @@ const ComparisonCharts = () => {
                 {/* ── 0. Color legend for models ── */}
                 <ModelColorLegend models={models} />
 
-                {/* ── 1. Radar delle Performance ── */}
+                {/* ── 1. Small Multiples — one radar per model ── */}
+                <ModelRadarGrid models={models} radarData={data.radar_data} methods={methods} />
+
+                {/* ── 2. Radar delle Performance (multi-method overlay) ── */}
                 <section className="comparison-section">
-                    <h2 className="section-title">Radar delle Performance</h2>
+                    <h2 className="section-title">Radar delle Performance — Confronto Metodi</h2>
                     <p className="section-desc">
                         Visualizzazione multi-dimensionale delle 5 metriche principali su tutti i metodi.
                         Aree più estese verso l'esterno indicano performance migliori.
@@ -220,158 +263,7 @@ const ComparisonCharts = () => {
                     </div>
                 </section>
 
-                {/* ── 2. BBQ Bias Score per Categoria ── */}
-                {(data.bbq_bias_chart || []).length > 0 && (
-                    <section className="comparison-section">
-                        <h2 className="section-title">BBQ Bias Score per Categoria</h2>
-                        <p className="section-desc">
-                            Score direzionale del bias per ogni categoria sociale (<strong>ideale: 0</strong>).
-                            Negativo = tendenza anti-stereotipo. Positivo = tendenza stereotipante.
-                            Ogni gruppo di barre rappresenta una categoria; ogni barra un metodo.
-                        </p>
-                        <div className="chart-container">
-                            <ResponsiveContainer width="100%" height={500}>
-                                <BarChart
-                                    data={data.bbq_bias_chart}
-                                    margin={{ top: 36, right: 20, left: 30, bottom: 120 }}
-                                    barGap={6}
-                                    barCategoryGap="25%"
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#1e3a5f" />
-                                    {bbqXAxis}
-                                    <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} />
-                                    <ReferenceLine y={0} stroke="#e2e8f0" strokeDasharray="4 4" />
-                                    <Tooltip {...tooltipStyle} formatter={(v) => [v.toFixed(4)]} />
-                                    <Legend verticalAlign="top" height={40} wrapperStyle={{ color: '#94a3b8', fontSize: '0.8rem' }} />
-                                    {dynamicBars(methods)}
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </section>
-                )}
-
-                {/* ── 3. BBQ Accuracy per Categoria ── */}
-                {(data.bbq_accuracy_chart || []).length > 0 && (
-                    <section className="comparison-section">
-                        <h2 className="section-title">BBQ Accuracy per Categoria</h2>
-                        <p className="section-desc">
-                            Percentuale di risposte corrette sulla disambiguazione per ogni categoria.
-                            <strong> Più alto = meglio.</strong> Evidenzia dove ogni metodo performa meglio.
-                        </p>
-                        <div className="chart-container">
-                            <ResponsiveContainer width="100%" height={500}>
-                                <BarChart
-                                    data={data.bbq_accuracy_chart}
-                                    margin={{ top: 36, right: 20, left: 30, bottom: 120 }}
-                                    barGap={6}
-                                    barCategoryGap="25%"
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#1e3a5f" />
-                                    {bbqXAxis}
-                                    <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} unit="%" />
-                                    <Tooltip {...tooltipStyle} formatter={(v) => [`${v.toFixed(1)}%`]} />
-                                    <Legend verticalAlign="top" height={40} wrapperStyle={{ color: '#94a3b8', fontSize: '0.8rem' }} />
-                                    {dynamicBars(methods)}
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </section>
-                )}
-
-                {/* ── 4. StereoSet LMS per Categoria ── */}
-                {(data.ss_lms_chart || []).length > 0 && (
-                    <section className="comparison-section">
-                        <h2 className="section-title">StereoSet LMS per Categoria</h2>
-                        <p className="section-desc">
-                            Language Modeling Score per dominio di bias.
-                            <strong> Più alto = meglio.</strong> Valori bassi indicano degrado linguistico post-steering.
-                        </p>
-                        <div className="chart-container">
-                            <ResponsiveContainer width="100%" height={420}>
-                                <BarChart
-                                    data={data.ss_lms_chart}
-                                    margin={{ top: 36, right: 20, left: 30, bottom: 120 }}
-                                    barGap={6}
-                                    barCategoryGap="25%"
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#1e3a5f" />
-                                    {ssXAxis}
-                                    <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} unit="%" domain={[60, 100]} />
-                                    <Tooltip {...tooltipStyle} formatter={(v) => [`${v.toFixed(1)}%`]} />
-                                    <Legend verticalAlign="top" height={40} wrapperStyle={{ color: '#94a3b8', fontSize: '0.8rem' }} />
-                                    {dynamicBars(methods)}
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </section>
-                )}
-
-                {/* ── 5. StereoSet SS per Categoria ── */}
-                {(data.ss_ss_chart || []).length > 0 && (
-                    <section className="comparison-section">
-                        <h2 className="section-title">StereoSet SS per Categoria</h2>
-                        <p className="section-desc">
-                            Stereotype Score per dominio. <strong>Ideale ≈ 50%.</strong>
-                            La linea tratteggiata indica il punto di neutralità.
-                        </p>
-                        <div className="chart-container">
-                            <ResponsiveContainer width="100%" height={420}>
-                                <BarChart
-                                    data={data.ss_ss_chart}
-                                    margin={{ top: 36, right: 20, left: 30, bottom: 120 }}
-                                    barGap={6}
-                                    barCategoryGap="25%"
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#1e3a5f" />
-                                    {ssXAxis}
-                                    <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} unit="%" domain={[45, 80]} />
-                                    <ReferenceLine y={50} stroke="#e2e8f0" strokeDasharray="4 4"
-                                        label={{ value: '50% ideale', fill: '#64748b', fontSize: 10, position: 'insideTopRight' }} />
-                                    <Tooltip {...tooltipStyle} formatter={(v) => [`${v.toFixed(1)}%`]} />
-                                    <Legend verticalAlign="top" height={40} wrapperStyle={{ color: '#94a3b8', fontSize: '0.8rem' }} />
-                                    {dynamicBars(methods)}
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </section>
-                )}
-
-                {/* ── 6. Confronto Metriche per Metodo (summary) ── */}
-                <section className="comparison-section">
-                    <h2 className="section-title">Panoramica Metriche per Metodo</h2>
-                    <p className="section-desc">
-                        Ogni gruppo di barre rappresenta un metodo. Le cinque metriche vengono comparate
-                        direttamente per valutare il trade-off tra de-biasing e mantenimento delle capacità.
-                    </p>
-                    <div className="chart-container">
-                        <ResponsiveContainer width="100%" height={460}>
-                            <BarChart
-                                data={data.metrics_bar || []}
-                                margin={{ top: 36, right: 20, left: 30, bottom: 100 }}
-                                barGap={4}
-                                barCategoryGap="30%"
-                            >
-                                <CartesianGrid strokeDasharray="3 3" stroke="#1e3a5f" />
-                                <XAxis dataKey="method" tick={{ fill: '#94a3b8', fontSize: 11 }}
-                                    angle={-35} textAnchor="end" interval={0} height={90} />
-                                <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} domain={[0, 100]} />
-                                <Tooltip {...tooltipStyle} formatter={(v, n) => [`${v.toFixed(2)}%`, n]} />
-                                <Legend verticalAlign="top" height={40} wrapperStyle={{ color: '#94a3b8', fontSize: '0.8rem' }} />
-                                {Object.entries({
-                                    'BBQ Accuracy':  '#7fdbff',
-                                    'StereoSet LMS': '#4ade80',
-                                    'StereoSet SS':  '#FF8C00',
-                                    'ICAT Score':    '#a78bfa',
-                                    'MMLU Accuracy': '#f87171',
-                                }).map(([key, color]) => (
-                                    <Bar key={key} dataKey={key} fill={color} radius={[4, 4, 0, 0]} maxBarSize={20} />
-                                ))}
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </section>
-
-                {/* ── 7. Guida alla Lettura ── */}
+                {/* ── 3. Guida alla Lettura ── */}
                 <section className="comparison-section">
                     <h2 className="section-title">Guida alla Lettura delle Metriche</h2>
                     <div className="legend-grid">

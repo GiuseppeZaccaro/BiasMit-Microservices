@@ -12,9 +12,9 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Service
+@Service//notazione per comunicare che il componente gestisce la logica di business
 public class InferenceService {
-
+    //dichiarazione client HTTP
     private final RestTemplate restTemplate;
 
     @Value("${python.inference.url}")
@@ -29,6 +29,7 @@ public class InferenceService {
      * Recupera il report grezzo da Python e lo trasforma in una mappa di metriche.
      */
     public Map<String, Object> getModelMethodReport(String model, String method) {
+    //costruzion url dinamico
     String url = String.format("%s/metrics/%s/report/%s", pythonServiceUrl, model.toLowerCase(), method.toLowerCase());
     System.out.println("Chiamata a Python URL: " + url); // LOG DI DEBUG
     
@@ -38,10 +39,13 @@ public class InferenceService {
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(List.of(MediaType.TEXT_PLAIN, MediaType.ALL));
         HttpEntity<Void> entity = new HttpEntity<>(headers);
+        //rawText conterrà il contenuto del report.txt 
+        //il metodo exchange permette di fare la chiamata GET passando gli header di sicurezza appena creati
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
         String rawText = response.getBody();
         System.out.println("Risposta ricevuta da Python: " + (rawText != null ? "OK" : "NULL"));
 
+        //se il file non contiene testo restituisce errore
         if (rawText == null || rawText.isEmpty()) {
             return createErrorResponse(method, "Report vuoto");
         }
@@ -55,11 +59,13 @@ public class InferenceService {
     /**
      * Logica di estrazione dati tramite Espressioni Regolari
      */
+    //crea un dizionario Java in cui salva le metriche pronte per diventare un Json
     private Map<String, Object> parseMetrics(String text, String method) {
         Map<String, Object> data = new HashMap<>();
         data.put("method", method);
 
         // --- REGEX PER MMLU ---
+        //regex cerca i tag, la frase e il numero
         // Baseline ha [MMLU], metodi CAA hanno [MMLU_BBQ_MEAN]/[MMLU_SS_MEAN],
         // FairSteer ha [MMLU_BBQ_GLOBAL]/[MMLU_SS_GLOBAL]. Il lazy .*? cattura la prima sezione BBQ.
         data.put("mmlu_bbq_acc", extract(text, "\\[MMLU[^\\]]*\\].*?Accuracy Globale MMLU: ([\\d.]+%?)"));
@@ -77,12 +83,13 @@ public class InferenceService {
         return data;
     }
 
+    //funzione esecutiva della regex
     private String extract(String text, String regex) {
         // Pattern.DOTALL permette al punto (.) di includere anche i caratteri "a capo" (\n)
         Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
         Matcher matcher = pattern.matcher(text);
-        if (matcher.find()) {
-            return matcher.group(1).trim();
+        if (matcher.find()) {//cerca corrispondenza nel testo
+            return matcher.group(1).trim();//resituisce il valore catturato dentro le tonde
         }
         return "N/D";
     }
@@ -97,7 +104,10 @@ public class InferenceService {
     /**
      * 2. REGISTRY — dynamic model and dataset lists
      */
+    //formattazione degli URL corretti per python
+    //la risposta sarà una lista di elementi di cui non ci interessa il contenuto (?)
     public List<?> getModels() {
+        //chiamata GET
         return restTemplate.getForObject(pythonServiceUrl + "/models", List.class);
     }
 
@@ -125,6 +135,7 @@ public class InferenceService {
     /**
      * 4. CONFRONTO RISPOSTE
      */
+    //restituisce un generico Object.class perchè la risposta di python + un json complesso
     public Object getComparison(String dataset, String model, String category, int exampleId) {
         String url = String.format("%s/%s/comparison/%s/%s/%d",
                 pythonServiceUrl, dataset.toLowerCase(), model.toLowerCase(), category, exampleId);

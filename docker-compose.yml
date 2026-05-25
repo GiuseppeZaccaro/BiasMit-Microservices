@@ -1,24 +1,26 @@
-version: '3.8'
+version: '3.8' #versione della sintassi
 
 services:
 
   # 1. Microservizio Python — Inference
   ai-inference-service:
-    build: ./ai-inference-mock
+    build: ./ai-inference-mock #indica che docker deve costruire l'immagine partendo dal dockerfile della cartella
     container_name: ai-inference-service
     ports:
       - "8000:8000"
+
+    #variabili d'ambiente iniettate nel container al momento dell'avvio. Sono quelle lette dal config_manager
     environment:
       - DATA_BASE_PATH=/app/data/datasets
       - RESULTS_BASE_PATH=/app/data/results
       - STATS_BASE_PATH=/app/data/stats
       - MODELS_CONFIG_PATH=/app/models.yaml
     volumes:
-      - ./shared/config_manager.py:/app/config_manager.py:ro
+      - ./shared/config_manager.py:/app/config_manager.py:ro #sola lettura read-only
       - ./shared/models.yaml:/app/models.yaml:ro
       - ./data:/app/data
     networks:
-      - bias-network
+      - bias-network #collega il container alla rete virtuale per permettere la comunicazione
 
   # 2. Microservizio Python — Analytics
   ai-analytics-service:
@@ -39,10 +41,11 @@ services:
 
   # 3. Database PostgreSQL
   db:
-    image: postgres:15
+    image: postgres:15 #uso immagine ufficiale
     container_name: bias-db
-    restart: always
+    restart: always  #riavvio automatico in caso di crash 
     environment:
+    #leggo le variabili dal .env altrimenti le imposto con valori di default
       POSTGRES_USER: ${POSTGRES_USER:-user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
       POSTGRES_DB: ${POSTGRES_DB:-bias_db}
@@ -76,6 +79,7 @@ services:
     ports:
       - "8080:8080"
     depends_on:
+    #definisco i container che devono essere avviati prima del Gateway
       - db
       - ai-inference-service
       - ai-analytics-service
@@ -93,8 +97,8 @@ services:
   # 6. Frontend React (Nginx)
   frontend:
     build:
-      context: ./frontend
-      args:
+      context: ./frontend #specifico la cartella radice per il build
+      args: #passa variabili al momento del build
         VITE_API_BASE_URL: http://localhost:8080/api/gateway
     container_name: bias-frontend
     ports:
@@ -104,9 +108,10 @@ services:
     networks:
       - bias-network
 
+#creo rete virtuale isolata in modo che i container siano invisibili all'esterno
 networks:
   bias-network:
-    driver: bridge
+    driver: bridge #driver standard
 
-volumes:
+volumes: #persistenza gestita da docker
   postgres_data:

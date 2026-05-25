@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useReducer } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { comparePrompt } from '../services/api';
 import { useBookmarks } from '../context/BookmarkContext';
@@ -7,14 +7,12 @@ import './Compare.css';
 const METHOD_LABELS = {
     baseline: 'Baseline',
     caa_puntuale: 'CAA Puntuale',
-    caa_block: 'CAA Block',
     fairsteer: 'FairSteer',
 };
 
 const METHOD_COLORS = {
     baseline: '#94a3b8',
     caa_puntuale: '#7fdbff',
-    caa_block: '#FF8C00',
     fairsteer: '#4ade80',
 };
 
@@ -36,9 +34,10 @@ const Compare = () => {
     const navigate = useNavigate();
     const { findBookmark, addBookmark, removeBookmark } = useBookmarks();
 
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [{ loading, data, error }, dispatch] = useReducer(
+        (_, a) => a,
+        { loading: true, data: null, error: null }
+    );
     const [bmLoading, setBmLoading] = useState(false);
 
     const exampleId = parseInt(id, 10);
@@ -46,12 +45,12 @@ const Compare = () => {
     const isBookmarked = !!existingBookmark;
 
     useEffect(() => {
-        setLoading(true);
-        setError(null);
+        let isMounted = true;
+        dispatch({ loading: true, data: null, error: null });
         comparePrompt(dataset, model, category, id)
-            .then(res => setData(res.data))
-            .catch(() => setError('Impossibile caricare i dati di confronto.'))
-            .finally(() => setLoading(false));
+            .then(res => { if (isMounted) dispatch({ loading: false, data: res.data, error: null }); })
+            .catch(() => { if (isMounted) dispatch({ loading: false, data: null, error: 'Impossibile caricare i dati di confronto.' }); });
+        return () => { isMounted = false; };
     }, [dataset, model, category, id]);
 
     const getPromptText = () => {
@@ -240,7 +239,7 @@ const Compare = () => {
                 </section>
 
                 <section className="responses-section">
-                    <h3 className="section-label">Risposte dei 4 Metodi</h3>
+                    <h3 className="section-label">Risposte dei 3 Metodi</h3>
                     <div className="responses-grid">
                         {Object.entries(data.comparison || {}).map(([method, response]) => (
                             <div

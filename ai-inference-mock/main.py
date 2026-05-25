@@ -1,54 +1,58 @@
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import PlainTextResponse
-import pandas as pd
-import pyarrow as pa
-import pyarrow.ipc as ipc
-import json
-import os
-import numpy as np
+from fastapi import FastAPI, HTTPException, Query #framework web async per python e gestione errori HTTP con codice e messaggio
+from fastapi.middleware.cors import CORSMiddleware #meccanismo di sicurezza browser che blocca chiamate HTTP tra domini diversi
+from fastapi.responses import PlainTextResponse #risposta HTTP con content type text/plain invece di application/json (usata per i txt)
+import pandas as pd #manipolazione e lettura csv
+import pyarrow as pa #gestione file binari
+import pyarrow.ipc as ipc #gestione file .arrow
+import json #parsing json
+import os #variabili d'ambiente e operazioni fylesystem
+import numpy as np #operazioni numeriche
 import ast
 import traceback
 import config_manager
 
+#creo istanza dell'applicazione FastAPI
 app = FastAPI(title="BiasMit AI Inference Service")
 
+#configurazione sicurezza
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["*"], #accetta richieste di qualsiasi origine
+    allow_methods=["*"], #accetta tutti i metodi HTTP
+    allow_headers=["*"], #accetta tutti gli header HTTP
 )
 
+#variabili d'ambiente definite nel docker-compose, getenv garantisce che il servizio funzioni anche senza Docker
 DATA_BASE_PATH    = os.getenv("DATA_BASE_PATH",    "/app/data/datasets")
 RESULTS_BASE_PATH = os.getenv("RESULTS_BASE_PATH", "/app/data/results")
 STATS_BASE_PATH   = os.getenv("STATS_BASE_PATH",   "/app/data/stats")
 
 
 # --- REGISTRY ENDPOINTS ---
-
-@app.get("/models")
+#@app.get trasforma la funzione python in una pagina web raggiungibile dal browser
+@app.get("/models") #definizione endpoint per attivare la funzione sottostante
 def get_models():
     """Returns the list of registered models from models.yaml."""
-    models = config_manager.load_models()
+    models = config_manager.load_models() #recupera la lista dei modelli 
     return [
         {k: v for k, v in m.items() if k != "results"}
         for m in models
-    ]
+    ] #crea un nuovo dizionario prendendo tutte le coppie chiave-valore ed escludendo la chiave results erchè contiene file pesanti
 
-@app.get("/datasets")
+@app.get("/datasets") #definizione endpoint per attivare la funzione sottostante
 def get_datasets():
     """Returns datasets auto-discovered from the data folder (require metadata.json + .arrow/.jsonl)."""
-    return config_manager.discover_datasets()
+    return config_manager.discover_datasets()#recupera la lista dei dataset
 
 
 # --- FUNZIONI DI SUPPORTO (CARICAMENTO BINARIO) ---
-
+#provo a leggere i file .arrow in tutti i modi possibili perchè possono essere salvati in modi diversi
 def load_stereoset_df():
     """Carica il file StereoSet provando tutti i formati Arrow possibili."""
     file_path = os.path.join(DATA_BASE_PATH, "stereoset", "intrasentence.arrow")
 
     if not os.path.exists(file_path):
+        #lancio errore 404 se il file non esiste sul disco
         raise HTTPException(status_code=404, detail=f"File non trovato: {file_path}")
 
     try:
@@ -75,35 +79,39 @@ def load_stereoset_df():
 
 
 # --- HELPERS BBQ ---
-
+#funzione che normalizza la risposta grezza del modello in una lettera per confronto uniforme
 def normalize_bbq_response(raw_val, target_data):
-    val = str(raw_val).strip().lower()
+    val = str(raw_val).strip().lower()#prende la risposta grezza e la converte in stringa (rimuove spazi bianchi)
     if not val or val == "nan": return "N/A"
+    #intercetto i casi in cui il modello ha risposto iniziando direttamente con la lettera
     if val[0] in ['a', 'b', 'c'] and (len(val) == 1 or not val[1].isalpha()):
-        return val[0].upper()
+        return val[0].upper() #restituisce la risposta convertita in maiuscolo
 
+    #creo dizionario delle risposte in cui la chiave è la lettera maiuscola
     if target_data:
         options = {"A": str(target_data.get('ans0', '')).lower(),
                    "B": str(target_data.get('ans1', '')).lower(),
                    "C": str(target_data.get('ans2', '')).lower()}
         for letter, text in options.items():
             if text and (text in val or val in text): return letter
-    return val[:15]
+    return val[:15]#restituisce i primi 15 caratteri della risposta se non riesce a risalire alla lettera
 
+#funzione che estrae una risposta specifica data da un modello
 def find_bbq_response(file_path, category, example_id, target_data):
     if not os.path.exists(file_path): return "File missing"
     try:
-        df = pd.read_csv(file_path, engine='python')
-        res = df[df['Category'].str.lower() == category.lower()]
-        if example_id < len(res):
-            raw_val = res.iloc[example_id]['Model_Response']
-            return normalize_bbq_response(raw_val, target_data)
+        df = pd.read_csv(file_path, engine='python')#pandas trasforma il csv in una tabella dati
+        res = df[df['Category'].str.lower() == category.lower()]#applico filtro categoria
+        if example_id < len(res):#controllo se l'id è minore della lunghezza totale delle righe
+            raw_val = res.iloc[example_id]['Model_Response']#prelevo solo il valore della colonna model_response
+            return normalize_bbq_response(raw_val, target_data)#passa la stringa alla funzione di normalizzazione
         return "N/A"
     except: return "Error"
 
 
 # --- HELPER STEREOSET ---
-
+#funzione che cerca la risposte stereoset
+#restituisce al gateway un dizionario di probabilità
 def find_ss_response(file_path, bias_type, target_word):
     if not os.path.exists(file_path):
         return "File missing"
@@ -118,6 +126,7 @@ def find_ss_response(file_path, bias_type, target_word):
         if 'target' in df.columns:
             df['target'] = df['target'].astype(str).str.lower().str.strip()
 
+        #filtraggio dinamico dei dati
         res = pd.DataFrame()
         if 'target' in df.columns:
             res = df[(df['bias_type'] == bias_type.lower()) &
@@ -125,6 +134,7 @@ def find_ss_response(file_path, bias_type, target_word):
         elif 'bias_type' in df.columns:
             res = df[df['bias_type'] == bias_type.lower()]
 
+        #se il filtro produce risultati, estaggo la prima riga trovata e restituisco un dizionario Python 
         if not res.empty:
             return {
                 "stereo":     round(float(res.iloc[0].get('ll_stereo', 0)), 4),
@@ -137,10 +147,12 @@ def find_ss_response(file_path, bias_type, target_word):
 
 
 # --- ENDPOINT REPORT (TESTO PURO) ---
-
+#funzione che serve a leggere e inviare un file di testo così com è
+#con le graffe indico parametri dinamici in FastAPI
 @app.get("/metrics/{model}/report/{method}", response_class=PlainTextResponse)
 def get_model_report(model: str, method: str):
     """Restituisce il contenuto del file .txt esattamente come salvato su disco."""
+    #compongo dinamicamente il percorso del file
     file_name = f"report_{method.lower()}.txt"
     file_path = os.path.join(STATS_BASE_PATH, model.lower(), file_name)
 
@@ -149,19 +161,21 @@ def get_model_report(model: str, method: str):
 
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
-            return f.read()
+            return f.read()#apre il file in modalità lettura se esiste
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 # --- ENDPOINTS BBQ ---
-
+#elenca tutte le categorie di bias di BBQ e ne restituisce una lista ordinata
 @app.get("/bbq/categories")
 def get_bbq_categories():
     bbq_dir = os.path.join(DATA_BASE_PATH, "bbq")
     if not os.path.exists(bbq_dir): return []
+    #prende solo i file che finisco per .jsonl
     return sorted([f.replace(".jsonl", "") for f in os.listdir(bbq_dir) if f.endswith(".jsonl")])
 
+#legge le domande di una categoria specifica
 @app.get("/bbq/category/{category}/questions")
 def get_bbq_questions(category: str, limit: int = 100):
     file_path = os.path.join(DATA_BASE_PATH, "bbq", f"{category.lower()}.jsonl")
@@ -169,23 +183,27 @@ def get_bbq_questions(category: str, limit: int = 100):
     with open(file_path, 'r', encoding='utf-8') as f:
         return [json.loads(line) for i, line in enumerate(f) if i < limit]
 
+#confronto diretto domanda specifica
 @app.get("/bbq/comparison/{model}/{category}/{example_id}")
 def get_bbq_comparison(model: str, category: str, example_id: int):
     questions = get_bbq_questions(category, limit=example_id + 100)
+    #cerca tra le domande quella selezionata dall'utente
     target = next((q for q in questions if q.get('example_id') == example_id), None)
     if not target: raise HTTPException(404, "ID not found")
 
-    model_dir = os.path.join(RESULTS_BASE_PATH, model.lower())
+    #crea un dizionario con tutte le risposte ad una specifica domanda
     result_files = config_manager.get_model_result_files(model, 'bbq')
     comparison = {
-        key: find_bbq_response(os.path.join(model_dir, fname), category, example_id, target)
+        key: find_bbq_response(os.path.join(RESULTS_BASE_PATH, fname), category, example_id, target)
         for key, fname in result_files.items()
     }
+    #restituisce un JSON con la domanda e le risposte dei vari metodi
     return {"original_data": target, "comparison": comparison}
 
 
 # --- HELPER STEREOSET SENTENCES ---
-
+#funzione di traduttore universale perchè le risposte possono avere label diverse
+#definisce due dizionari di mappatura e standardizza l'output in un valore chiave
 def _decode_ss_label(lbl):
     int_map = {0: 'stereo', 1: 'anti', 2: 'unrelated'}
     str_map = {'stereotype': 'stereo', 'anti-stereotype': 'anti', 'unrelated': 'unrelated'}
@@ -193,7 +211,8 @@ def _decode_ss_label(lbl):
         return int_map.get(int(lbl))
     return str_map.get(str(lbl).lower().strip())
 
-
+#funzione che analizza ed estrae la frase in base al formato trovato
+#restituisce un dizionario contenente le 3 possibili opzioni
 def extract_ss_sentences(row):
     sentences_map = {}
     try:
@@ -310,10 +329,9 @@ def get_ss_comparison(model: str, category: str, example_id: int):
                     sentences_map[label_map.get(lbl, lbl)] = txt
 
         target_word = str(target_row['target'])
-        model_dir = os.path.join(RESULTS_BASE_PATH, model.lower())
         result_files = config_manager.get_model_result_files(model, 'stereoset')
         comparison = {
-            key: find_ss_response(os.path.join(model_dir, fname), category, target_word)
+            key: find_ss_response(os.path.join(RESULTS_BASE_PATH, fname), category, target_word)
             for key, fname in result_files.items()
         }
 
@@ -322,8 +340,8 @@ def get_ss_comparison(model: str, category: str, example_id: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/")
+@app.get("/")#rotta radice dell'applicazione FastAPI
 def root():
     models = [m["id"] for m in config_manager.load_models()]
     datasets = [d["id"] for d in config_manager.discover_datasets()]
-    return {"status": "active", "models": models, "datasets": datasets}
+    return {"status": "active", "models": models, "datasets": datasets}#resituisce dizionario con le informazioni del servizio

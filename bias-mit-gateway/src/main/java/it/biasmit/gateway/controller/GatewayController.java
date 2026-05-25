@@ -10,11 +10,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/gateway")
-@CrossOrigin(origins = "*") // Necessario per permettere la comunicazione con il Frontend
+@RestController //dice a Spring che questo è un controller Rest
+@RequestMapping("/api/gateway") //imposta il prefisso URL per tutti gli endpoint della classe
+@CrossOrigin(origins = "*") // Necessario per permettere la comunicazione con il Frontend, permette di accettare chiamate da qualsiasi origine
 public class GatewayController {
 
+    //dependency injection tramite costruttore
     private final InferenceService inferenceService;
     private final BookmarkRepository bookmarkRepository;
     private final AnalyticsService analyticsService;
@@ -124,12 +125,12 @@ public class GatewayController {
     // Salva un prompt e una risposta specifica nel database (idempotente: restituisce l'esistente se già salvato)
     @PostMapping("/bookmarks")//@RequestBody trasforma il Json del frontend in un oggetto java di tipo bookmark
     public ResponseEntity<Bookmark> saveBookmark(@RequestBody Bookmark bookmark) {
-        return bookmarkRepository
-            .findByDatasetAndModelNameAndCategoryAndExampleId(
+        return bookmarkRepository //inizia interazione con il db
+            .findByDatasetAndModelNameAndCategoryAndExampleId( //query
                 bookmark.getDataset(), bookmark.getModelName(),
                 bookmark.getCategory(), bookmark.getExampleId())
-            .map(ResponseEntity::ok)
-            .orElseGet(() -> ResponseEntity.ok(bookmarkRepository.save(bookmark)));
+            .map(ResponseEntity::ok)//si attiva solo se l'elemento esiste già nel db
+            .orElseGet(() -> ResponseEntity.ok(bookmarkRepository.save(bookmark)));//inserisce l'elemento nei preferiti se non esiste
     }
 
     // Recupera tutti i preferiti salvati

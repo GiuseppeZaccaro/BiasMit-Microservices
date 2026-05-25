@@ -15,10 +15,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # config_manager.py and models.yaml are injected at runtime via docker-compose volume mounts
 # from ./shared/ — do not bake them into the image.
+#lo inserisco dopo i requirements perchè il main cambia più frequentemente e  se docker trovasse prima questo invaliderebbe la cache del pip install
 COPY main.py .
 
-# Esponi la porta 8000 (quella usata da FastAPI)
+# Esponi la porta 8000 
 EXPOSE 8000
 
-# Comando per avviare il server uvicorn
+# Comando per avviare il server uvicorn (per applicazioni python)
+#ascolta su tutte le interfacce di rete del container e non solo su localhost (con 0.0.0.0)
+#senza questo il servizio sarebbe raggiungibile solo dall'interno del container stesso
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

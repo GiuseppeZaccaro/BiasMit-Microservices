@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useReducer } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
@@ -24,15 +24,20 @@ const Dashboard = () => {
     // Content
     const [categories, setCategories] = useState([]);
     const [questions, setQuestions]   = useState([]);
-    const [analyticsSummary, setAnalyticsSummary] = useState([]);
-    const [statsLoading, setStatsLoading] = useState(false);
+    const [{ analyticsSummary, statsLoading }, dispatchAnalytics] = useReducer(
+        (_, a) => a,
+        { analyticsSummary: [], statsLoading: false }
+    );
 
     // Bootstrap: particles + fetch registry
     useEffect(() => {
-        initParticlesEngine(async (engine) => { await loadSlim(engine); }).then(() => setInit(true));
+        let isMounted = true;
+        initParticlesEngine(async (engine) => { await loadSlim(engine); })
+            .then(() => { if (isMounted) setInit(true); });
 
         Promise.all([getModels(), getDatasets()])
             .then(([mRes, dRes]) => {
+                if (!isMounted) return;
                 const mList = mRes.data || [];
                 const dList = dRes.data || [];
                 setModels(mList);
@@ -41,37 +46,42 @@ const Dashboard = () => {
                 if (dList.length > 0) setDataset(dList[0].id);
             })
             .catch(err => console.error('Errore caricamento registry:', err));
+        return () => { isMounted = false; };
     }, []);
 
     // Fetch analytics summary when model changes
     useEffect(() => {
         if (!model) return;
-        setAnalyticsSummary([]);
-        setStatsLoading(true);
+        let isMounted = true;
+        dispatchAnalytics({ analyticsSummary: [], statsLoading: true });
         getModelAnalytics(model)
-            .then(res => setAnalyticsSummary(res.data?.summary || []))
-            .catch(() => setAnalyticsSummary([]))
-            .finally(() => setStatsLoading(false));
+            .then(res => { if (isMounted) dispatchAnalytics({ analyticsSummary: res.data?.summary || [], statsLoading: false }); })
+            .catch(() => { if (isMounted) dispatchAnalytics({ analyticsSummary: [], statsLoading: false }); });
+        return () => { isMounted = false; };
     }, [model]);
 
     // Fetch categories when dataset changes
     useEffect(() => {
         if (!dataset) return;
+        let isMounted = true;
         getCategories(dataset).then(res => {
+            if (!isMounted) return;
             const cats = res.data || [];
             setCategories(cats);
             if (cats.length > 0) setCategory(cats[0]);
         }).catch(err => console.error('Errore categorie:', err));
+        return () => { isMounted = false; };
     }, [dataset]);
 
     // Fetch questions when category or dataset changes
     useEffect(() => {
         if (!category || !dataset) return;
-        setQuestions([]);
+        let isMounted = true;
         getQuestions(dataset, category, 100)
-            .then(res => setQuestions(res.data || []))
+            .then(res => { if (isMounted) setQuestions(res.data || []); })
             .catch(err => console.error('Errore domande:', err));
-    }, [category, dataset, model]);
+        return () => { isMounted = false; };
+    }, [category, dataset]);
 
     const modelObj   = models.find(m => m.id === model)   || {};
     const datasetObj = datasets.find(d => d.id === dataset) || {};

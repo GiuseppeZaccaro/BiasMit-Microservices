@@ -13,10 +13,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+#percorso dei report statistici
 STATS_BASE_PATH = os.getenv("STATS_BASE_PATH", "/app/data/stats")
 
 # Human-readable label hints; unrecognised keys are auto-derived from the key name.
+#dizionario di traduzione per la conversione dei nomi tecnici dei file in etichette pulite per i grafici
 _METHOD_LABEL_HINTS: dict = {
     "baseline":     "Baseline",
     "caa_puntuale": "CAA Puntuale",
@@ -29,9 +30,10 @@ _METHOD_LABEL_HINTS: dict = {
 # ---------------------------------------------------------------------------
 
 def method_label(key: str) -> str:
+    #usa l'etichetta se presente nel dizionario altrimenti ne genera una leggibile
     return _METHOD_LABEL_HINTS.get(key, key.replace("_", " ").title())
 
-
+#funzione che scansiona la cartella delle stats e restituisce una lista ordinata contenente i modi delle sottocartelle
 def discover_models() -> list:
     """Return model IDs that have a stats subdirectory."""
     if not os.path.exists(STATS_BASE_PATH):
@@ -41,7 +43,7 @@ def discover_models() -> list:
         if os.path.isdir(os.path.join(STATS_BASE_PATH, d))
     )
 
-
+#entra nella cartella di un modello specifico e cerca i file txt che iniziano per report
 def discover_methods(model: str) -> list:
     """Return method keys discovered as report_*.txt files for the given model."""
     model_dir = os.path.join(STATS_BASE_PATH, model.lower())
@@ -57,7 +59,7 @@ def discover_methods(model: str) -> list:
 # ---------------------------------------------------------------------------
 # Report parsing
 # ---------------------------------------------------------------------------
-
+#legge il contenuto del report di un determinato modello e metodo
 def read_report(model: str, method: str) -> str:
     path = os.path.join(STATS_BASE_PATH, model.lower(), f"report_{method}.txt")
     if not os.path.exists(path):
@@ -65,7 +67,7 @@ def read_report(model: str, method: str) -> str:
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
 
-
+#funzione di conversione di una stringa numerica estratta dal testo in un numero decimale
 def to_float(s: str) -> float:
     if not s or s == "N/D":
         return 0.0
@@ -79,7 +81,7 @@ def extract(text: str, pattern: str) -> str:
     m = re.search(pattern, text, re.DOTALL)
     return m.group(1).strip() if m else "N/D"
 
-
+#funzione che mappa i macro punteggi globali in un dizionario  e ne cattura solo la parte numerica
 def parse_report(text: str) -> dict:
     if not text:
         return {}
@@ -93,6 +95,7 @@ def parse_report(text: str) -> dict:
         "bbq_bias":       to_float(extract(text, r"Bias Score[^:]*:\s*([\d.-]+)")),
     }
 
+    #trova occorrenze relative a stereoset
     ss_cats: dict = {}
     for m in re.finditer(r"-\s+(\w+)\s+\|\s+LMS:\s+([\d.]+%?)\s+\|\s+SS:\s+([\d.]+%?)", text):
         ss_cats[m.group(1).strip()] = {
@@ -100,7 +103,7 @@ def parse_report(text: str) -> dict:
             "ss":  to_float(m.group(3)),
         }
     result["stereoset_categories"] = ss_cats
-
+    #trova occorrenze relative a bbq
     bbq_cats: dict = {}
     for m in re.finditer(r"-\s+([\w]+)\s+\|\s+Acc:\s+([\d.]+%?)\s+\|\s+Bias:\s+([\d.-]+)", text):
         bbq_cats[m.group(1).strip()] = {
@@ -109,14 +112,14 @@ def parse_report(text: str) -> dict:
         }
     result["bbq_categories"] = bbq_cats
 
-    return result
+    return result #restituisce l'intero dizionario
 
 
 # ---------------------------------------------------------------------------
 # Registry endpoints — delegate to shared config_manager
 # ---------------------------------------------------------------------------
 
-@app.get("/models")
+@app.get("/models")#endpoint modelli
 def get_models():
     """
     List models that have stats on disk, enriched with registry metadata
@@ -133,7 +136,8 @@ def get_models():
     return result
 
 
-@app.get("/datasets")
+@app.get("/datasets")#endpoint dataset
+#creo nuova funzione per mantenere separate le responsabilità e per estensibilità futura
 def get_datasets():
     """List datasets auto-discovered from the data folder (shared config_manager logic)."""
     return config_manager.discover_datasets()
@@ -142,7 +146,7 @@ def get_datasets():
 # ---------------------------------------------------------------------------
 # Analytics endpoints
 # ---------------------------------------------------------------------------
-
+#cerca i metodi disponibili per il modello 
 @app.get("/analytics/model/{model_name}")
 def get_model_analytics(model_name: str):
     """Structured analytics for all discovered methods of a model — Recharts-ready."""
@@ -159,9 +163,12 @@ def get_model_analytics(model_name: str):
     if not methods:
         return empty
 
+    #dizionario per le chiavi tecniche associate ai nomi puliti
     lbl      = {m: method_label(m) for m in methods}
+    #dizionario per i report già analizzati e parsati
     all_data = {m: parse_report(read_report(model_name, m)) for m in methods}
 
+    #tabella di riepilogo globale con arrotondamento dei valori decimali
     summary = [
         {
             "method":         lbl[m],
@@ -210,7 +217,7 @@ def get_model_analytics(model_name: str):
     }
 
 
-@app.get("/analytics/comparison")
+@app.get("/analytics/comparison")#endpoint che unisce i dati di tutti i modelli e tutti i metodi
 def get_comparison_analytics():
     """
     Multi-model, multi-method comparison.
@@ -228,9 +235,11 @@ def get_comparison_analytics():
     if not all_model_ids:
         return empty
 
+    #mappa i metodi per ciascun modello
     methods_per_model = {mid: discover_methods(mid) for mid in all_model_ids}
     multi = len(all_model_ids) > 1
 
+    #generatore di chiavi univoche
     def bar_key(mid: str, m: str) -> str:
         if not multi:
             return method_label(m)
@@ -238,6 +247,7 @@ def get_comparison_analytics():
         name = reg.get("name", mid.capitalize()) if reg else mid.capitalize()
         return f"{name} — {method_label(m)}"
 
+    #lista di tuple per ogni combinazione disponibile
     all_pairs    = [(mid, m) for mid in all_model_ids for m in methods_per_model.get(mid, [])]
     all_bar_keys = [bar_key(mid, m) for mid, m in all_pairs]
 

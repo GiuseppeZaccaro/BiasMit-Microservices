@@ -6,7 +6,7 @@ const DATASET_LABELS = { bbq: 'BBQ', stereoset: 'StereoSet' };
 
 const Bookmarks = () => {
     const navigate = useNavigate();
-    const { bookmarks, initialized, removeBookmark } = useBookmarks();
+    const { bookmarks, initialized, removeBookmark } = useBookmarks();//destrutturazione dell'oggetto value messo a disposizione dal provider
 
     // Deduplica per sicurezza: tieni solo il primo record per combinazione univoca
     const seen = new Set();

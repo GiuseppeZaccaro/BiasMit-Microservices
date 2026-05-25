@@ -201,13 +201,50 @@
     overflow-x: auto;
 }
 
+/* ── Small Multiples grid ── */
+.small-multiples-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    margin-top: 16px;
+}
+
+.model-radar-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid #1e3a5f;
+    border-radius: 10px;
+    padding: 16px 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: border-color 0.2s ease;
+}
+
+.model-radar-card:hover {
+    border-color: #2d5a8a;
+}
+
+.model-radar-card-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #7fdbff;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-align: center;
+    margin: 0;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
     .legend-grid { grid-template-columns: repeat(2, 1fr); }
+    .small-multiples-grid { grid-template-columns: repeat(2, 1fr); }
 }
-@media (max-width: 700px) {
+@media (max-width: 500px) {
     .comparison-header { padding: 20px; flex-wrap: wrap; }
     .comparison-content { padding: 24px 20px; }
     .comparison-section { padding: 20px 16px; }
     .legend-grid { grid-template-columns: 1fr; }
+    .small-multiples-grid { grid-template-columns: 1fr; }
 }

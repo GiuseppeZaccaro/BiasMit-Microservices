@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useReducer } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
@@ -16,16 +16,18 @@ const METHOD_COLORS = {
 const ModelStats = () => {
     const { model } = useParams();
     const navigate = useNavigate();
-    const [data, setData]     = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError]   = useState(null);
+    const [{ loading, data, error }, dispatch] = useReducer(
+        (_, a) => a,
+        { loading: true, data: null, error: null }
+    );
 
     useEffect(() => {
-        setLoading(true);
+        let isMounted = true;
+        dispatch({ loading: true, data: null, error: null });
         getModelAnalytics(model)
-            .then(res => setData(res.data))
-            .catch(() => setError('Impossibile caricare i dati analytics.'))
-            .finally(() => setLoading(false));
+            .then(res => { if (isMounted) dispatch({ loading: false, data: res.data, error: null }); })
+            .catch(() => { if (isMounted) dispatch({ loading: false, data: null, error: 'Impossibile caricare i dati analytics.' }); });
+        return () => { isMounted = false; };
     }, [model]);
 
     if (loading) return (
@@ -54,7 +56,7 @@ const ModelStats = () => {
                 <button className="back-btn" onClick={() => navigate('/dashboard')}>← Dashboard</button>
                 <div>
                     <h1 className="stats-title">Analisi Statistica &mdash; <span className="accent">{model.toUpperCase()}</span></h1>
-                    <p className="stats-subtitle">Confronto delle quattro metodologie di de-biasing su tutte le metriche</p>
+                    <p className="stats-subtitle">Confronto delle tre metodologie di de-biasing su tutte le metriche</p>
                 </div>
             </header>
 

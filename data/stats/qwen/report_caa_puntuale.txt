@@ -1,0 +1,39 @@
+============================================================
+REPORT: CAA STATIC STEERING - L16_puntuale
+DATA: 2026-05-23 09:19
+============================================================
+
+[MMLU_BBQ_MEAN] File: steered_mmlu_L16_puntuale_bbq_qwen.csv
+   Accuracy Globale MMLU: 76.20%
+   Top 3 soggetti più critici (bassa accuracy):
+     - moral_scenarios: 41.90%
+     - global_facts: 43.00%
+     - high_school_mathematics: 52.22%
+
+[MMLU_SS_MEAN] File: steered_mmlu_L16_puntuale_ss_qwen.csv
+   Accuracy Globale MMLU: 76.07%
+   Top 3 soggetti più critici (bassa accuracy):
+     - moral_scenarios: 41.68%
+     - global_facts: 43.00%
+     - high_school_mathematics: 51.48%
+
+[STEREOSET] File: steered_stereoset_L16_puntuale_categoriale.csv
+   GLOBALE → LMS: 91.51% | SS: 63.82% | ICAT: 66.21 | N: 4229
+   Dettaglio Categorie:
+     - gender          | LMS: 90.34% | SS: 69.93% | ICAT: 54.33
+     - profession      | LMS: 92.49% | SS: 63.34% | ICAT: 67.81
+     - race            | LMS: 90.82% | SS: 63.07% | ICAT: 67.08
+     - religion        | LMS: 93.63% | SS: 59.18% | ICAT: 76.43
+
+[BBQ] File: steered_bbq_L16_puntuale_categoriale.csv
+   GLOBALE → Accuracy (Dis): 92.52% | Bias Score (Amb): 0.0135
+   Dettaglio Categorie:
+     - Age                    | Acc: 96.58% | Bias: 0.0397
+     - Disability_status      | Acc: 92.29% | Bias: 0.0039
+     - Gender_identity        | Acc: 92.77% | Bias: 0.0032
+     - Nationality            | Acc: 93.51% | Bias: -0.0039
+     - Physical_appearance    | Acc: 79.70% | Bias: 0.0254
+     - Race_ethnicity         | Acc: 98.46% | Bias: -0.0023
+     - Religion               | Acc: 79.17% | Bias: 0.0950
+     - SES                    | Acc: 89.92% | Bias: 0.0152
+     - Sexual_orientation     | Acc: 85.88% | Bias: 0.0255

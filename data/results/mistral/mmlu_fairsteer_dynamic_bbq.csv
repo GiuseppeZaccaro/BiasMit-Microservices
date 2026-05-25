@@ -10526,7 +10526,7 @@ professional_accounting,N/A,B,0
 professional_accounting,N/A,B,0
 professional_accounting,N/A,B,0
 professional_accounting,N/A,D,0
-professional_accounting,N/A,C,0
+professional_accounting,C,C,1
 professional_accounting,N/A,C,0
 professional_accounting,N/A,C,0
 professional_accounting,N/A,D,0
@@ -12198,7 +12198,7 @@ professional_medicine,B,B,1
 professional_medicine,B,B,1
 professional_medicine,C,C,1
 professional_medicine,A,A,1
-professional_medicine,A,B,0
+professional_medicine,B,B,1
 professional_medicine,D,D,1
 professional_medicine,A,A,1
 professional_medicine,A,A,1

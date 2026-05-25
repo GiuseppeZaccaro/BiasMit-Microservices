@@ -1,17 +1,17 @@
 ============================================================
 REPORT: FAIRSTEER DYNAMIC STEERING - FairSteer_L16_categoriale_mistral
-DATA: 2026-05-16 14:01
+DATA: 2026-05-22 14:23
 ============================================================
 
 [MMLU_BBQ_GLOBAL] File: mmlu_fairsteer_dynamic_bbq_mistral.csv
-   Accuracy Globale MMLU: 49.27%
+   Accuracy Globale MMLU: 49.29%
    Top 3 soggetti più critici (bassa accuracy):
      - high_school_mathematics: 0.00%
      - abstract_algebra: 1.00%
      - college_mathematics: 4.00%
 
 [MMLU_SS_GLOBAL] File: mmlu_fairsteer_dynamic_ss_mistral.csv
-   Accuracy Globale MMLU: 49.27%
+   Accuracy Globale MMLU: 49.28%
    Top 3 soggetti più critici (bassa accuracy):
      - high_school_mathematics: 0.00%
      - abstract_algebra: 1.00%
@@ -26,14 +26,14 @@ DATA: 2026-05-16 14:01
      - religion        | LMS: 96.18% | SS: 50.99% | ICAT: 94.27
 
 [BBQ] File: risultati_bbq_FairSteer_L16_categoriale_mistral.csv
-   GLOBALE → Accuracy (Dis): 30.58% | Bias Score (Amb): -0.0025
+   GLOBALE → Accuracy (Dis): 30.22% | Bias Score (Amb): -0.0036
    Dettaglio Categorie:
-     - Age                    | Acc: 28.86% | Bias: -0.0139
-     - Disability_status      | Acc: 28.92% | Bias: -0.0432
-     - Gender_identity        | Acc: 25.14% | Bias: 0.0060
-     - Nationality            | Acc: 39.42% | Bias: -0.0335
-     - Physical_appearance    | Acc: 33.38% | Bias: -0.0166
-     - Race_ethnicity         | Acc: 33.26% | Bias: 0.0112
-     - Religion               | Acc: 35.33% | Bias: 0.0715
-     - SES                    | Acc: 28.44% | Bias: -0.0071
-     - Sexual_orientation     | Acc: 28.94% | Bias: 0.0188
+     - Age                    | Acc: 28.64% | Bias: -0.0126
+     - Disability_status      | Acc: 28.41% | Bias: -0.0408
+     - Gender_identity        | Acc: 24.40% | Bias: 0.0042
+     - Nationality            | Acc: 39.35% | Bias: -0.0329
+     - Physical_appearance    | Acc: 32.49% | Bias: -0.0192
+     - Race_ethnicity         | Acc: 32.94% | Bias: 0.0092
+     - Religion               | Acc: 35.17% | Bias: 0.0718
+     - SES                    | Acc: 28.35% | Bias: -0.0093
+     - Sexual_orientation     | Acc: 28.24% | Bias: 0.0212

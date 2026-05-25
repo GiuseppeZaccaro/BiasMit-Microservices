@@ -1,14 +1,16 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel #libreria per definire la struttura esatta dei dati attesi nella richiesta HTTP
 from typing import List
 import os
 import uvicorn
 
 from groq import Groq
 
+#inizializzazione FastAPI
 app = FastAPI(title="BiasMit Interpretation Service")
 
+#configurazione middleware permettendo a qualunque client di fare qualsiasi tipo di richiesta
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,7 +25,7 @@ LLM_MODEL   = os.getenv("LLM_MODEL", "llama-3.1-8b-instant")
 # ---------------------------------------------------------------------------
 # Request schema
 # ---------------------------------------------------------------------------
-
+#definizione schema della richiesta per perfezione verso Groq
 class MethodStats(BaseModel):
     model_name: str          # e.g. "mistral"
     method: str              # e.g. "Baseline", "CAA Puntuale", "FairSteer"
@@ -34,7 +36,8 @@ class MethodStats(BaseModel):
     bbq_acc: float
     bbq_bias: float
 
-
+#funzione per l'analisi singola che di più modelli
+#la richiesta è una lista di MethodStats
 class AnalyzeRequest(BaseModel):
     methods: List[MethodStats]
 
@@ -42,11 +45,11 @@ class AnalyzeRequest(BaseModel):
 # ---------------------------------------------------------------------------
 # Prompt builder
 # ---------------------------------------------------------------------------
-
+#usa i dati numerici e li trasforma in un lunghissimo testo in linguaggio naturale
 def build_prompt(req: AnalyzeRequest) -> str:
     # Unique models in insertion order
-    modelli_unici = list(dict.fromkeys(m.model_name for m in req.methods))
-    is_comparative = len(modelli_unici) > 1
+    modelli_unici = list(dict.fromkeys(m.model_name for m in req.methods))#trucco per deduplicare mantenendo l'ordine di inserimento
+    is_comparative = len(modelli_unici) > 1 #flag per capire il numero di modelli
 
     tipo_analisi = (
         "un CONFRONTO CRITICO CROSS-MODELLO tra i diversi LLM selezionati"
@@ -57,6 +60,8 @@ def build_prompt(req: AnalyzeRequest) -> str:
     # Build data block organized by model
     lines = []
     for model_id in modelli_unici:
+        #filtra i metodi in base al modello e raggruppa i dati per modello
+        #aggiunge intestazioni leggibili
         model_methods = [m for m in req.methods if m.model_name == model_id]
         if is_comparative:
             lines.append(f"\n=== Modello: {model_id.upper()} ===")
@@ -64,6 +69,7 @@ def build_prompt(req: AnalyzeRequest) -> str:
             lines.append(f"Modello LLM analizzato: {model_id.upper()}")
         lines.append(f"Metodologie incluse: {', '.join(m.method for m in model_methods)}")
         lines.append("Risultati sperimentali:")
+        #scrittura dati numerici
         for m in model_methods:
             lines += [
                 f"\n  [{m.method}]",
@@ -74,10 +80,11 @@ def build_prompt(req: AnalyzeRequest) -> str:
                 f"    BBQ Accuracy:    {m.bbq_acc:.2f}%  (disambiguazione — più alto = meglio)",
                 f"    BBQ Bias Score:  {m.bbq_bias:.4f}   (ideale = 0; negativo = anti-stereotipo)",
             ]
-
+    #crea lista con i nomi dei modelli separati da una virgola
     models_list = ", ".join(m.upper() for m in modelli_unici)
 
     # Section 3 is cross-model when multiple models are selected, architecture-specific otherwise
+    #in base al numero di modelli, cambia il tipo di analisi da fare
     sezione_3 = (
         "**3. IPOTESI SUL PRE-TRAINING E COMPORTAMENTO CROSS-MODELLO**\n"
         f"Analizza le differenze di risposta allo steering tra i modelli ({models_list}) dal punto di vista "
@@ -93,7 +100,7 @@ def build_prompt(req: AnalyzeRequest) -> str:
         "oppure distribuito diffusamente, basandoti sui pattern di risposta osservati (degrado linguistico, "
         "variazione del bias score). Suggerisci quale range di layer potrebbe essere più efficace."
     )
-
+    #restituisce prompt finale
     return (
         "Agisci come un Senior Research Scientist in AI Alignment ed epistemologia dei Large Language Models.\n\n"
         "Ti vengono forniti i risultati di un esperimento di mitigazione del bias (usando CAA e FairSteer) "
@@ -134,14 +141,15 @@ def build_prompt(req: AnalyzeRequest) -> str:
 # ---------------------------------------------------------------------------
 
 def call_groq(prompt: str) -> str:
+    #crea client Groq con api key ad ogni chiamata
     client = Groq(api_key=LLM_API_KEY)
     response = client.chat.completions.create(
         model=LLM_MODEL,
         messages=[{"role": "user", "content": prompt}],
-        max_tokens=1200,
-        temperature=0.2,
+        max_tokens=1200,#limite massimo di token nella risposta
+        temperature=0.2,#creatività dell'LLM
     )
-    return response.choices[0].message.content
+    return response.choices[0].message.content #estrazione del testo della risposta dal primo elemento (Groq restituisce più elementi in parallelo)
 
 
 # ---------------------------------------------------------------------------
@@ -161,7 +169,7 @@ def analyze(req: AnalyzeRequest):
     if not req.methods:
         raise HTTPException(status_code=400, detail="Nessun dato fornito per l'analisi.")
 
-    prompt = build_prompt(req)
+    prompt = build_prompt(req)#costruzione prompt a partire dai dati della richiesta
     try:
         analysis = call_groq(prompt)
     except Exception as e:
@@ -173,10 +181,10 @@ def analyze(req: AnalyzeRequest):
         "model_used": LLM_MODEL,
         "models_analyzed": modelli,
         "methods_analyzed": list(dict.fromkeys(m.method for m in req.methods)),
-    }
+    }#restituisce un JSON contenente l'analisi testuale
 
 
-@app.get("/")
+@app.get("/")#rotta radice per lo stato del servizio
 def root():
     return {
         "status": "active",
@@ -185,7 +193,7 @@ def root():
         "model": LLM_MODEL,
     }
 
-
+#blocco eseguito se il file viene lanciato direttamente dal terminale
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8002"))
     uvicorn.run(app, host="0.0.0.0", port=port)
