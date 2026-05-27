@@ -35,17 +35,24 @@ const Dashboard = () => {
         initParticlesEngine(async (engine) => { await loadSlim(engine); })
             .then(() => { if (isMounted) setInit(true); });
 
-        Promise.all([getModels(), getDatasets()])
-            .then(([mRes, dRes]) => {
-                if (!isMounted) return;
-                const mList = mRes.data || [];
-                const dList = dRes.data || [];
-                setModels(mList);
-                setDatasets(dList);
-                if (mList.length > 0) setModel(mList[0].id);
-                if (dList.length > 0) setDataset(dList[0].id);
-            })
-            .catch(err => console.error('Errore caricamento registry:', err));
+        const fetchRegistry = async (retries = 5, delay = 3000) => {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const [mRes, dRes] = await Promise.all([getModels(), getDatasets()]);
+                    if (!isMounted) return;
+                    const mList = mRes.data || [];
+                    const dList = dRes.data || [];
+                    setModels(mList);
+                    setDatasets(dList);
+                    if (mList.length > 0) setModel(mList[0].id);
+                    if (dList.length > 0) setDataset(dList[0].id);
+                    return;
+                } catch (err) {
+                    if (i < retries - 1) await new Promise(r => setTimeout(r, delay));
+                }
+            }
+        };
+        fetchRegistry();
         return () => { isMounted = false; };
     }, []);
 
@@ -58,7 +65,7 @@ const Dashboard = () => {
             .then(res => { if (isMounted) dispatchAnalytics({ analyticsSummary: res.data?.summary || [], statsLoading: false }); })
             .catch(() => { if (isMounted) dispatchAnalytics({ analyticsSummary: [], statsLoading: false }); });
         return () => { isMounted = false; };
-    }, [model]);
+    }, [model,models]);
 
     // Fetch categories when dataset changes
     useEffect(() => {

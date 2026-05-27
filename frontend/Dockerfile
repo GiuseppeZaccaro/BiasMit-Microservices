@@ -11,9 +11,9 @@ COPY . .
 
 # L'URL del gateway viene iniettato a build-time come ARG (accessibile da Vite tramite VITE_)
 #dichiaro un argomento di build ,cioè una variabile che esiste solo mentre creo l'immagine e che dice a React dove cercare Springboot
-ARG VITE_API_BASE_URL=http://localhost:8080/api/gateway
+ARG VITE_API_BASE_URL
 #Trasforma l'argomento in una variabile d'ambiente
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8080/api/gateway}
 #compilazione
 RUN npm run build
 
