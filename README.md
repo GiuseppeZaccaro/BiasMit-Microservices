@@ -109,7 +109,7 @@ Un approccio di steering **adattivo**. Invece di applicare una correzione costan
 
 ---
 
-## 📦 Installazione e Avvio Rapido
+## 📦 Installazione e Avvio Rapido (Locale)
 
 ### Prerequisiti
 
@@ -120,19 +120,13 @@ Un approccio di steering **adattivo**. Invece di applicare una correzione costan
 ### 1. Clona il repository
 
 ```bash
-git clone https://github.com/<tuo-username>/BiasMit-Microservices-1.git
-cd BiasMit-Microservices-1
+git clone https://github.com/<tuo-username>/BiasMit-Microservices.git
+cd BiasMit-Microservices
 ```
 
 ### 2. Configura le variabili d'ambiente
 
-Copia il template e inserisci le tue credenziali:
-
-```bash
-cp .env.example .env
-```
-
-Modifica `.env`:
+Crea il file `.env` nella root del progetto:
 
 ```dotenv
 # ── Groq LLM (necessario per l'interpretazione IA) ────────────────────────
@@ -143,7 +137,12 @@ LLM_MODEL=llama-3.1-8b-instant
 POSTGRES_USER=user
 POSTGRES_PASSWORD=password
 POSTGRES_DB=bias_db
+
+# ── Frontend (lasciare vuoto in locale, usa il default localhost) ──────────
+VITE_API_BASE_URL=
 ```
+
+> **Nota:** In locale `VITE_API_BASE_URL` può essere lasciato vuoto — il Dockerfile usa automaticamente `http://localhost:8080/api/gateway` come fallback. In produzione va impostato con l'IP pubblico del server (vedi sezione Deploy).
 
 ### 3. Costruisci e avvia tutti i servizi
 
@@ -178,6 +177,81 @@ docker compose down -v       # Ferma ed elimina tutti i volumi (reset completo)
 
 ---
 
+## ☁️ Deploy in Produzione (Google Cloud)
+
+### Prerequisiti
+
+- Una VM Google Cloud (testato su **e2-standard-2**, Ubuntu 22.04)
+- Docker e Docker Compose installati sulla VM
+- Porta **5173** e **8080** aperte nelle regole firewall di GCP
+
+### 1. Clona il repository sulla VM
+
+```bash
+git clone https://github.com/<tuo-username>/BiasMit-Microservices.git
+cd BiasMit-Microservices
+```
+
+### 2. Configura il `.env` di produzione
+
+```dotenv
+# ── Groq LLM ──────────────────────────────────────────────────────────────
+LLM_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+LLM_MODEL=llama-3.1-8b-instant
+
+# ── PostgreSQL ────────────────────────────────────────────────────────────
+POSTGRES_USER=user
+POSTGRES_PASSWORD=password
+POSTGRES_DB=bias_db
+
+# ── Frontend — URL pubblico del gateway ───────────────────────────────────
+VITE_API_BASE_URL=http://<IP_PUBBLICO_VM>:8080/api/gateway
+```
+
+> **Importante:** `VITE_API_BASE_URL` deve contenere l'IP pubblico della VM (o un dominio), **non** `localhost`. Questa variabile viene iniettata nel bundle React a build-time da Vite.
+
+### 3. Nota sul Case Sensitivity dei Dataset
+
+Linux è **case-sensitive**, a differenza di Windows. I file `.jsonl` del dataset BBQ devono avere nomi in **lowercase** per essere trovati correttamente dal servizio di inferenza. Rinomina i file se necessario:
+
+```bash
+cd data/datasets/bbq
+for f in *.jsonl; do mv "$f" "$(echo $f | tr '[:upper:]' '[:lower:]')"; done
+```
+
+### 4. Avvia lo stack
+
+```bash
+sudo docker compose up -d --build
+```
+
+Il gateway Spring Boot impiega circa **15 secondi** ad avviarsi completamente. Il frontend è configurato con un meccanismo di retry automatico che ritenta le chiamate API fino a 5 volte con intervalli di 3 secondi, garantendo che la dashboard si popoli correttamente anche se il gateway non è ancora pronto al primo accesso.
+
+### 5. Accedi all'applicazione
+
+```
+http://<IP_PUBBLICO_VM>:5173
+```
+
+### 6. IP Statico (consigliato)
+
+Per evitare che l'IP cambi ad ogni riavvio della VM, promuovi l'IP a statico dalla console GCP:
+
+**VPC Network → Indirizzi IP esterni → seleziona l'IP della VM → Promuovi a statico**
+
+### 7. Aggiornare il codice in produzione
+
+Dopo ogni push su GitHub:
+
+```bash
+cd ~/BiasMit-Microservices
+git pull
+sudo docker compose build --no-cache frontend   # solo se modificato il frontend
+sudo docker compose up -d
+```
+
+---
+
 ## 🔌 Estensibilità
 
 Uno dei principi cardine di BiasMit è l'**agnosticismo rispetto a modelli e dataset**. Aggiungere un nuovo modello o dataset non richiede modifiche al codice — solo file di configurazione e dati.
@@ -188,14 +262,14 @@ Aggiungi una voce a `shared/models.yaml`:
 
 ```yaml
 models:
-  - id: qwen                                # identificatore univoco (minuscolo)
+  - id: qwen
     name: "Qwen 2.5 7B Instruct"
     architecture: "Dense Transformer"
     details: >
       28 livelli residuali, Hidden Size 3584. GQA con 4 KV heads.
       Attivazione SwiGLU, codifica posizionale RoPE.
     steering_type: "categoriale"
-    layers: [14]                             # livello/i di steering target
+    layers: [14]
     results:
       bbq:
         baseline:     "qwen/baseline_bbq_full.csv"
@@ -224,6 +298,8 @@ Poi copia i CSV corrispondenti in `data/results/qwen/` e i file di report statis
   "categories": ["categoria_a", "categoria_b"]
 }
 ```
+
+> **Attenzione:** Su Linux i nomi dei file `.jsonl` devono essere in **lowercase** per essere trovati correttamente dal servizio di inferenza.
 
 Il Servizio di Inferenza rileva automaticamente tutti i dataset con un `metadata.json` valido e li espone immediatamente tramite l'endpoint `/datasets`.
 
@@ -262,7 +338,7 @@ Risultati per i due modelli attualmente registrati nella piattaforma:
 | CAA Puntuale | — | — | — | — |
 | FairSteer (k=−0.5) | — | — | — | — |
 
-> I dettagli per categoria sono disponibili nel dashboard interattivo su `localhost:5173/comparison`.
+> I dettagli per categoria sono disponibili nel dashboard interattivo.
 
 ---
 
@@ -274,7 +350,7 @@ Risultati per i due modelli attualmente registrati nella piattaforma:
 | **Frontend** | Vite | 6 | Build tool e server di sviluppo |
 | **Frontend** | Recharts | 2 | Libreria per grafici interattivi |
 | **Frontend** | React Router | 6 | Navigazione lato client |
-| **Frontend** | Nginx | 1.25 | Server di file statici in produzione |
+| **Frontend** | Nginx | 1.25 | Server di file statici in produzione + reverse proxy |
 | **Gateway** | Spring Boot | 3 | Gateway REST API e livello di orchestrazione |
 | **Gateway** | Java | 17 | Runtime |
 | **Gateway** | Spring JPA | 3 | ORM per la persistenza su PostgreSQL |
@@ -295,7 +371,7 @@ Risultati per i due modelli attualmente registrati nella piattaforma:
 ## 📂 Struttura del Repository
 
 ```
-BiasMit-Microservices-1/
+BiasMit-Microservices/
 │
 ├── shared/                         # Configurazione condivisa (montata in tutti i servizi Python)
 │   ├── models.yaml                 # Registro modelli — unica fonte di verità
@@ -303,23 +379,40 @@ BiasMit-Microservices-1/
 │
 ├── data/
 │   ├── datasets/                   # Dataset benchmark grezzi
-│   │   ├── bbq/                    # BBQ .jsonl + metadata
+│   │   ├── bbq/                    # BBQ .jsonl (lowercase) + metadata
 │   │   └── stereoset/              # StereoSet .arrow + metadata
 │   ├── results/                    # Risultati di inferenza pre-calcolati (CSV)
 │   │   ├── mistral/
-│   │   └── llama/
+│   │   ├── llama/
+│   │   └── qwen/
 │   └── stats/                      # Report statistici (TXT, analizzabili via regex)
 │       ├── mistral/
-│       └── llama/
+│       ├── llama/
+│       └── qwen/
 │
 ├── ai-inference-mock/              # Servizio Inferenza (FastAPI · :8000)
 ├── analytics-service/              # Servizio Analytics (FastAPI · :8001)
 ├── ai-interpretation-service/      # Servizio Interpretazione (FastAPI · Groq · :8002)
 ├── bias-mit-gateway/               # Gateway Spring Boot (:8080)
 ├── frontend/                       # SPA React (Vite · Nginx · :5173)
+│   ├── src/
+│   │   ├── pages/
+│   │   └── services/
+│   ├── nginx.conf                  # Configurazione Nginx (SPA fallback + reverse proxy)
+│   └── Dockerfile                  # Build multi-stage (Node → Nginx)
 │
-└── docker-compose.yml              # Orchestrazione dell'intero stack
+├── docker-compose.yml              # Orchestrazione dell'intero stack
+└── .env                            # Variabili d'ambiente (non committare in produzione)
 ```
+
+---
+
+## ⚠️ Note di Deploy
+
+- **Case sensitivity:** Linux distingue maiuscole e minuscole nei nomi dei file. I file `.jsonl` del dataset BBQ devono essere in **lowercase** (es. `age.jsonl`, non `Age.jsonl`).
+- **VITE_API_BASE_URL:** Questa variabile viene iniettata nel bundle JavaScript a **build-time** da Vite. Deve contenere l'URL pubblico del gateway in produzione. Modificarla richiede un rebuild del container frontend (`docker compose build --no-cache frontend`).
+- **Avvio del gateway:** Spring Boot impiega circa 15 secondi ad avviarsi. Il frontend gestisce questo ritardo tramite retry automatico (5 tentativi, intervallo 3s).
+- **Persistenza dei dati:** I file in `data/` sono montati come volumi Docker e non vengono inclusi nelle immagini. Devono essere presenti sulla macchina host prima dell'avvio.
 
 ---
 
