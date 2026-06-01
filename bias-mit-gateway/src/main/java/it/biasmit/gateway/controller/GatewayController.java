@@ -111,7 +111,7 @@ public class GatewayController {
     public ResponseEntity<?> analyze(@RequestBody Object requestBody) {
         try {
             return ResponseEntity.ok(interpretationService.analyze(requestBody));
-        } catch (org.springframework.web.client.HttpStatusCodeException e) {
+        } catch (org.springframework.web.client.HttpStatusCodeException e) {//in caso di errore propaga tutto ciò che riceve da FastAPI
             // Propagate status + original JSON body (includes FastAPI "detail" field)
             return ResponseEntity.status(e.getStatusCode())
                     .contentType(org.springframework.http.MediaType.APPLICATION_JSON)

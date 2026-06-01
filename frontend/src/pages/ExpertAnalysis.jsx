@@ -24,6 +24,7 @@ const tooltipStyle = {
 };
 
 const ExpertAnalysis = () => {
+    //gestione degli stati e degli ID dei modelli già scaricati
     const navigate = useNavigate();
     const [models, setModels]             = useState([]);
     const [selectedModels, setSelectedModels] = useState([]);
@@ -35,10 +36,12 @@ const ExpertAnalysis = () => {
     const fetchedRef = useRef(new Set());
     const isMountedRef = useRef(true);
 
-    useEffect(() => {
+    useEffect(() => {//pulisce la pagina
         return () => { isMountedRef.current = false; };
     }, []);
 
+    //funzione che scarica i dati per il singolo modello
+    //prima controlla se li ha già scaricati
     const fetchModelAnalytics = useCallback((modelId) => {
         if (fetchedRef.current.has(modelId)) return;
         fetchedRef.current.add(modelId);
@@ -59,7 +62,8 @@ const ExpertAnalysis = () => {
             });
     }, []);
 
-    // Load model list once; pre-select and pre-fetch first model
+    // Al primo avvio della pagina scarica la lista di tutti i modelli disponibili
+    //scaricando automaticamente i dati del primo pre-selezionato
     useEffect(() => {
         getModels()
             .then(res => {
@@ -77,6 +81,8 @@ const ExpertAnalysis = () => {
             });
     }, [fetchModelAnalytics]);
 
+    //gestione dell'interazione dell'utente per selezionare i modelli
+    //permette di aggiungere e rimuovere i modelli dall'analisi
     const toggleModel = (modelId) => {
         setSelectedModels(prev =>
             prev.includes(modelId)
@@ -88,13 +94,15 @@ const ExpertAnalysis = () => {
         setApiError('');
     };
 
+    //funzione che si attiva col pulsante e crea un array con tutti i dati dei modelli selezionati
+    //invia tutto all'API e salva la risposta
     const handleAnalyze = () => {
         const allMethods = [];
         for (const modelId of selectedModels) {
             const data = analyticsMap[modelId];
             if (!data) continue;
             for (const row of (data.summary || [])) {
-                allMethods.push({ model_name: modelId, ...row });
+                allMethods.push({ model_name: modelId, ...row });//aggiungo il modelID alla lista summary
             }
         }
         if (allMethods.length === 0) return;
@@ -113,6 +121,7 @@ const ExpertAnalysis = () => {
             .finally(() => setAnalyzing(false));
     };
 
+    //variabili che definiscono cosa mostrare nell'interfaccia
     const isMultiModel  = selectedModels.length > 1;
     const isLoadingAny  = selectedModels.some(id => loadingModels[id]);
     const canAnalyze    = selectedModels.length > 0
@@ -131,6 +140,7 @@ const ExpertAnalysis = () => {
         }));
     });
 
+    //formatta il testo grezzo ricevuto dall'LLM in html puro
     const renderAnalysis = (text) => {
         return text.split('\n').map((line, i) => {
             if (!line.trim()) return <div key={i} className="analysis-spacer" />;

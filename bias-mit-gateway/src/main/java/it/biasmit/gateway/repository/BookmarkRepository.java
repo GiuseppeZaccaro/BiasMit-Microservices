@@ -4,8 +4,8 @@ import it.biasmit.gateway.model.Bookmark;//import della classe entità
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-
+import java.util.Optional;//Optional è un contenitore che può essere pieno vuoto 
+//forza il programmatore a gestire esplicitamente il caso in cui il valore non esiste
 @Repository//indico a Spring che questo componente serve a comunicare con il db
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {//eredita le funzionalità di JpaRepository
     // Estendendo JpaRepository abbiamo già pronti i metodi: .save(), .findAll(), .deleteById()

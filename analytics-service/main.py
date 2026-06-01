@@ -42,7 +42,7 @@ def discover_models() -> list:
         d for d in os.listdir(STATS_BASE_PATH)
         if os.path.isdir(os.path.join(STATS_BASE_PATH, d))
     )
-
+#restituisce la lista ordinata dei metodi disponibili per un modello
 #entra nella cartella di un modello specifico e cerca i file txt che iniziano per report
 def discover_methods(model: str) -> list:
     """Return method keys discovered as report_*.txt files for the given model."""
@@ -76,7 +76,7 @@ def to_float(s: str) -> float:
     except ValueError:
         return 0.0
 
-
+#cerca il pattern nel testo e restituisce il gruppo catturato
 def extract(text: str, pattern: str) -> str:
     m = re.search(pattern, text, re.DOTALL)
     return m.group(1).strip() if m else "N/D"
@@ -183,6 +183,19 @@ def get_model_analytics(model_name: str):
         for m in methods
     ]
 
+    metrics_bar = [
+    {
+        "method":        lbl[m],
+        "BBQ Accuracy":  round(all_data[m].get("bbq_acc", 0), 2),
+        "StereoSet LMS": round(all_data[m].get("stereoset_lms", 0), 2),
+        "StereoSet SS":  round(all_data[m].get("stereoset_ss", 0), 2),
+        "ICAT Score":    round(all_data[m].get("stereoset_icat", 0), 2),
+        "MMLU Accuracy": round(all_data[m].get("mmlu_acc", 0), 2),
+    }
+    for m in methods
+]
+
+    #Costruzione dati per i grafici
     bbq_cats = sorted({c for d in all_data.values() for c in d.get("bbq_categories", {})})
     bbq_accuracy_chart = [
         {"category": cat,
@@ -206,10 +219,11 @@ def get_model_analytics(model_name: str):
          **{lbl[m]: all_data[m].get("stereoset_categories", {}).get(cat, {}).get("ss", 0) for m in methods}}
         for cat in ss_cats
     ]
-
+    #restituisce tutti i dati analitici pronti per il Recharts
     return {
         "model":              model_name,
         "summary":            summary,
+        "metrics_bar":        metrics_bar,
         "bbq_accuracy_chart": bbq_accuracy_chart,
         "bbq_bias_chart":     bbq_bias_chart,
         "ss_lms_chart":       ss_lms_chart,
@@ -248,12 +262,12 @@ def get_comparison_analytics():
         return f"{name} — {method_label(m)}"
 
     #lista di tuple per ogni combinazione disponibile
-    all_pairs    = [(mid, m) for mid in all_model_ids for m in methods_per_model.get(mid, [])]
-    all_bar_keys = [bar_key(mid, m) for mid, m in all_pairs]
+    all_pairs    = [(mid, m) for mid in all_model_ids for m in methods_per_model.get(mid, [])]#lista di combinazioni modello-metodo
+    all_bar_keys = [bar_key(mid, m) for mid, m in all_pairs]#lista di tutte le etichette corrispondenti
 
     parsed = {(mid, m): parse_report(read_report(mid, m)) for mid, m in all_pairs}
 
-    # --- per-category breakdown ---
+    # Raccolta delle categorie da tutti i modelli
     bbq_cats = sorted({c for d in parsed.values() for c in d.get("bbq_categories", {})})
     ss_cats  = sorted({c for d in parsed.values() for c in d.get("stereoset_categories", {})})
 
@@ -295,7 +309,7 @@ def get_comparison_analytics():
         {"metric": "MMLU Accuracy",
          **{bar_key(mid, m): round(parsed[(mid, m)].get("mmlu_acc", 0), 2)       for mid, m in all_pairs}},
     ]
-
+    #dati per il grafico a barre riepilogativo
     metrics_bar = [
         {
             "method":        bar_key(mid, m),
@@ -307,7 +321,7 @@ def get_comparison_analytics():
         }
         for mid, m in all_pairs
     ]
-
+    #restituisce tutti i dati comparativi tra modelli e metodi
     return {
         "models":              all_model_ids,
         "methods":             all_bar_keys,
@@ -320,11 +334,13 @@ def get_comparison_analytics():
     }
 
 
-@app.get("/")
+@app.get("/")#endpoint di status
 def root():
     return {"status": "active", "service": "BiasMit Analytics"}
 
-
+# Avvia il server uvicorn quando il file viene eseguito direttamente
+# Legge porta e host dalle variabili d'ambiente con fallback ai valori di default
+# host "0.0.0.0" significa che accetta connessioni da qualsiasi interfaccia di rete
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8001"))
     uvicorn.run(app, host=os.getenv("HOST", "0.0.0.0"), port=port)

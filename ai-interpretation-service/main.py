@@ -172,7 +172,7 @@ def analyze(req: AnalyzeRequest):
     prompt = build_prompt(req)#costruzione prompt a partire dai dati della richiesta
     try:
         analysis = call_groq(prompt)
-    except Exception as e:
+    except Exception as e:#utilizzo raise anzichè return perchè interrompe il flusso del programma
         raise HTTPException(status_code=502, detail=f"Errore chiamata Groq: {str(e)}")
 
     modelli = list(dict.fromkeys(m.model_name for m in req.methods))

@@ -16,6 +16,7 @@ WORKDIR /app
 #copia il .jar creato allo step precedente e lo rinomina in app.jar
 COPY --from=builder /app/target/gateway-*.jar app.jar
 EXPOSE 8080
+#comando fisso del container
 ENTRYPOINT ["java", "-jar", "app.jar"]
 
 #tecnicamente vengono create due immagini, ma alla fine ne ho solo una che è quella relativa all'esecuzione

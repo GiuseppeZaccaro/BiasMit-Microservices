@@ -139,6 +139,6 @@ public class InferenceService {
     public Object getComparison(String dataset, String model, String category, int exampleId) {
         String url = String.format("%s/%s/comparison/%s/%s/%d",
                 pythonServiceUrl, dataset.toLowerCase(), model.toLowerCase(), category, exampleId);
-        return restTemplate.getForObject(url, Object.class);
+        return restTemplate.getForObject(url, Object.class); //Object.class viene usato in quanto il json ottenuto non appartiene a nessuna classe Java
     }
 }

@@ -25,7 +25,7 @@ export const BookmarkProvider = ({ children }) => {
     const addBookmark = async (bookmarkData) => {
         //costruisce chiave univoca usando i dati del bookmark
         const key = `${bookmarkData.dataset}|${bookmarkData.modelName}|${bookmarkData.category}|${bookmarkData.exampleId}`;
-        if (pendingRef.current.has(key)) return null;//protezione dal doppio click
+        if (pendingRef.current.has(key)) return null;//protezione dal doppio click tramite chiave univoca
         pendingRef.current.add(key);//aggiunge la chiave al Set
         try {
             const res = await apiAdd(bookmarkData);
