@@ -10,7 +10,7 @@ import java.util.Optional;//Optional è un contenitore che può essere pieno vuo
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {//eredita le funzionalità di JpaRepository
     // Estendendo JpaRepository abbiamo già pronti i metodi: .save(), .findAll(), .deleteById()
    //funzionalità di JPA che permette di costruire le query tramite il nome del metodo utilizzando parole chiave
-    Optional<Bookmark> findByDatasetAndModelNameAndCategoryAndExampleId(
+    Optional<Bookmark> findByDatasetAndModelNameAndCategoryAndExampleId( //optional gestisce la possibilità che un valore sia presente o assente
         String dataset, String modelName, String category, Integer exampleId);
 }
 //Spring genera automaticamente il codice necessario per parlare con PostgreSQL ereditando da JpaRepository circa 30 metodi

@@ -106,6 +106,7 @@ const Dashboard = () => {
         return q.display_sentence || q.sentence || q.target || 'N/A';
     };
 
+    //questa funzione costruisce il pacchetto da inviare a Spring Boot unendo le variabili di stato e il testo normalizzato
     const handleBookmark = async (q, index, e) => {
         e.stopPropagation();//evita la propagazione del click
         const promptId = getPromptId(q, index);

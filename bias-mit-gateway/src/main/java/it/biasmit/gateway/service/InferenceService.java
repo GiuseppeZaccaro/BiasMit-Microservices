@@ -36,13 +36,13 @@ public class InferenceService {
     try {
         // Dichiaro esplicitamente Accept: text/plain per evitare che RestTemplate
         // tenti di deserializzare la risposta come JSON (che fallirebbe su text/plain)
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(List.of(MediaType.TEXT_PLAIN, MediaType.ALL));
-        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        HttpHeaders headers = new HttpHeaders();//contenitore per l'header della richiesta
+        headers.setAccept(List.of(MediaType.TEXT_PLAIN, MediaType.ALL));//definisco che preferisco la risposta come testo semplice, ma allo stesso tempo può andar bene qualsiasi altro formato
+        HttpEntity<Void> entity = new HttpEntity<>(headers);//impacchetto l'header in un oggetto HttpEntity che rappresenta l'intera richiesta
         //rawText conterrà il contenuto del report.txt 
         //il metodo exchange permette di fare la chiamata GET passando gli header di sicurezza appena creati
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-        String rawText = response.getBody();
+        String rawText = response.getBody();//estraggo la risposta
         System.out.println("Risposta ricevuta da Python: " + (rawText != null ? "OK" : "NULL"));
 
         //se il file non contiene testo restituisce errore
@@ -84,10 +84,11 @@ public class InferenceService {
     }
 
     //funzione esecutiva della regex
+    //metodo helper
     private String extract(String text, String regex) {
         // Pattern.DOTALL permette al punto (.) di includere anche i caratteri "a capo" (\n)
-        Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(text);
+        Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);//compilo la stringa in un oggetto Pattern che è una macchina a stati
+        Matcher matcher = pattern.matcher(text);//definisco il mio motore di ricerca
         if (matcher.find()) {//cerca corrispondenza nel testo
             return matcher.group(1).trim();//resituisce il valore catturato dentro le tonde
         }
