@@ -13,13 +13,30 @@ export const BookmarkProvider = ({ children }) => {
     const [initialized, setInitialized] = useState(false);//flag che diventa true solo dopo la prima chiamata API
     const pendingRef = useRef(new Set());//useRef non causa re-render, serve per tenere traccia delle operazioni di aggiunta in corso
 
-    // Carica tutti i preferiti dal DB all'avvio
-    useEffect(() => {
-        getBookmarks()//recupera i dati dal db
-            .then(res => setBookmarks(res.data || []))
-            .catch(() => {})//silenzia errori di rete
-            .finally(() => setInitialized(true));
-    }, []);//l'array vuoto indica che questo blocco viene eseguito solo quando il componente viene montato per la prima volta
+    // Carica tutti i preferiti dal DB all'avvio, con retry finché il gateway non è pronto
+useEffect(() => {
+    let isMounted = true;
+    const loadBookmarks = async (retries = 8, delay = 3000) => {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const res = await getBookmarks();
+                if (!isMounted) return;
+                setBookmarks(res.data || []);
+                setInitialized(true);
+                return;
+            } catch (err) {
+                if (i < retries - 1) {
+                    await new Promise(r => setTimeout(r, delay));
+                } else {
+                    console.error('Impossibile caricare i preferiti:', err);
+                    if (isMounted) setInitialized(true);
+                }
+            }
+        }
+    };
+    loadBookmarks();
+    return () => { isMounted = false; };
+}, []);
 
     // Aggiunge un preferito e aggiorna lo stato globale (protetto da doppio click)
     const addBookmark = async (bookmarkData) => {
