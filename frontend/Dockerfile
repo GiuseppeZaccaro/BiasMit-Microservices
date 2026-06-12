@@ -21,6 +21,7 @@ RUN npm run build
 #server web rapido 
 FROM nginx:alpine
 #prende il risultato del primo stage e cancella il resto
+#dist è la cartella di default in cui VITE salva i file statici e /usr/share/nginx/html è la cartella da cui nginx prende i file
 COPY --from=builder /app/dist /usr/share/nginx/html
 #sostisuisce la configurazione base di nginx con la mia
 COPY nginx.conf /etc/nginx/conf.d/default.conf

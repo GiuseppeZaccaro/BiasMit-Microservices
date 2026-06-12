@@ -102,7 +102,7 @@ services:
         VITE_API_BASE_URL: ${VITE_API_BASE_URL}
     container_name: bias-frontend
     ports:
-      - "5173:80"
+      - "5173:80" #dentro il container Nginx ascolta sulla 80, ma all'esterno il servizio è esposto su 5173
     depends_on:
       - gateway
     networks:

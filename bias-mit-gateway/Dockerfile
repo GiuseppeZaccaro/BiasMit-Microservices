@@ -3,7 +3,7 @@
 FROM maven:3.9-eclipse-temurin-17-alpine AS builder
 WORKDIR /app
 COPY pom.xml .
-#dice a Maven di scaricare tutte le dipendenze scritte nel pom
+#dice a Maven di scaricare tutte le dipendenze scritte nel pom e il -q fa si che non si veda l'installazione (quiet)
 RUN mvn dependency:go-offline -q
 COPY src ./src
 #compila il codice e crea il pacchetto .jar skippando i test
@@ -11,6 +11,7 @@ RUN mvn package -DskipTests -q
 
 # Stage 2: Runtime
 #immagine che verrà avviata sul server
+#versione di Java senza Maven solo per eseguire i programmi (più leggera)
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 #copia il .jar creato allo step precedente e lo rinomina in app.jar

@@ -60,7 +60,7 @@ def get_model_result_files(model_id: str, dataset_id: str) -> dict:
 # ---------------------------------------------------------------------------
 # Dataset Auto-Discovery
 # ---------------------------------------------------------------------------
-
+#evito di avere un file datasets.yaml esplorando l'ambiente
 def discover_datasets() -> List[dict]:
     # Questa funzione implementa un pattern di auto-discovery:
     # invece di configurare manualmente ogni dataset, il sistema

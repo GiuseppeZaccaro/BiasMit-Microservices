@@ -37,7 +37,7 @@ class MethodStats(BaseModel):
     bbq_bias: float
 
 #funzione per l'analisi singola che di più modelli
-#la richiesta è una lista di MethodStats
+#la richiesta è una lista di MethodStats e favorisce l'espandibilità
 class AnalyzeRequest(BaseModel):
     methods: List[MethodStats]
 
@@ -63,13 +63,14 @@ def build_prompt(req: AnalyzeRequest) -> str:
         #filtra i metodi in base al modello e raggruppa i dati per modello
         #aggiunge intestazioni leggibili
         model_methods = [m for m in req.methods if m.model_name == model_id]
+        #creo intestazione in relazione al numero di modelli
         if is_comparative:
             lines.append(f"\n=== Modello: {model_id.upper()} ===")
         else:
             lines.append(f"Modello LLM analizzato: {model_id.upper()}")
         lines.append(f"Metodologie incluse: {', '.join(m.method for m in model_methods)}")
         lines.append("Risultati sperimentali:")
-        #scrittura dati numerici
+        #scrittura dati numerici e formattazione
         for m in model_methods:
             lines += [
                 f"\n  [{m.method}]",

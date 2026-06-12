@@ -2,6 +2,9 @@
 FROM python:3.9-slim
 
 # Installiamo le dipendenze di sistema necessarie per gestire file binari (come Arrow)
+# installo i software disponibili aggiornati, build-essential è il nome del pacchetto
+#-y risponde automaticamente yes; no install recommend evita di installare i pacchetti consigliati
+#rm -rf serve ad eliminare il catalogo di programmi per risparmiare memoria
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
@@ -11,7 +14,9 @@ WORKDIR /app
 
 # Copia il file dei requisiti e installa le librerie Python
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+#no cache dir serve a cancellare la cache
+#-r sta per requirement
+RUN pip install --no-cache-dir -r requirements.txt 
 
 # config_manager.py and models.yaml are injected at runtime via docker-compose volume mounts
 # from ./shared/ — do not bake them into the image.
