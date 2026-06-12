@@ -185,7 +185,7 @@ Uno dei principi cardine di BiasMit è l'**agnosticismo rispetto a modelli e dat
 
 ```bash
 # 1. Clona il repository
-git clone https://github.com/<tuo-username>/BiasMit-Microservices.git
+git clone https://github.com/GiuseppeZaccaro/BiasMit-Microservices.git
 cd BiasMit-Microservices
 
 # 2. Crea il file .env nella root
