@@ -185,7 +185,7 @@ Uno dei principi cardine di BiasMit è l'**agnosticismo rispetto a modelli e dat
 
 ```bash
 # 1. Clona il repository
-git clone https://github.com/<tuo-username>/BiasMit-Microservices.git
+git clone https://github.com/GiuseppeZaccaro/BiasMit-Microservices.git
 cd BiasMit-Microservices
 
 # 2. Crea il file .env nella root
@@ -218,7 +218,7 @@ Per fermare lo stack: `docker compose down` (oppure `down -v` per reset completo
 Testato su VM **e2-standard-2**, Ubuntu 22.04, con le porte **5173** e **8080** aperte nel firewall GCP.
 
 ```bash
-git clone https://github.com/<tuo-username>/BiasMit-Microservices.git
+git clone https://github.com/GiuseppeZaccaro/BiasMit-Microservices.git
 cd BiasMit-Microservices
 
 # Configura il .env di produzione impostando:
